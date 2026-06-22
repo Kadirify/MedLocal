@@ -4,7 +4,7 @@ Her faz bir branch'te yapılır, doğrulanır, sonra bir sonrakine geçilir. "Ç
 
 Durum: `[ ]` başlamadı · `[~]` sürüyor · `[x]` bitti
 
-## Faz 0 — Ortam `[ ]`
+## Faz 0 — Ortam `[~]`
 
 | İş | Çıktı |
 |---|---|
