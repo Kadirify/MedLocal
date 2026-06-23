@@ -4,8 +4,16 @@ version = "0.1.0"
 description = "Fine-tuning, evaluation and export pipeline for MedLocal models"
 requires-python = ">=3.12,<3.13"
 dependencies = [
+    "accelerate>=1.15.0",
+    "bitsandbytes>=0.50.2",
+    "datasets>=4.3.0",
     "numpy>=2.5.3",
+    "peft>=0.21.0",
     "torch>=2.8",
+    "torchvision>=0.23",
+    "transformers>=5.5.0",
+    "trl>=0.24.0",
+    "unsloth>=2026.9.7",
 ]
 
 [project.scripts]
@@ -27,6 +35,7 @@ packages = ["src/medlocal_training"]
 
 [tool.uv.sources]
 torch = { index = "pytorch-cu128" }
+torchvision = { index = "pytorch-cu128" }
 
 [[tool.uv.index]]
 name = "pytorch-cu128"
