@@ -19,6 +19,7 @@ data/*
 !data/README.md
 !data/splits/
 training/runs/
+unsloth_compiled_cache/
 *.gguf
 *.safetensors
 *.bin
