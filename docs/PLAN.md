@@ -4,15 +4,14 @@ Her faz bir branch'te yapılır, doğrulanır, sonra bir sonrakine geçilir. "Ç
 
 Durum: `[ ]` başlamadı · `[~]` sürüyor · `[x]` bitti
 
-## Faz 0 — Ortam `[~]`
+## Faz 0 — Ortam `[x]`
 
 | İş | Çıktı |
 |---|---|
 | uv + Python 3.12, `training/pyproject.toml` | `uv sync` temiz çalışır |
-| PyTorch (CUDA 12.8), Unsloth, transformers, peft, trl, datasets | `torch.cuda.is_available()` → True, GPU adı RTX 5070 |
-| Ollama kurulumu | `ollama run` ile küçük bir model cevap verir |
-| pnpm workspace iskeleti | `pnpm install` temiz çalışır |
-| ruff, mypy, pytest, eslint, prettier ayarları | lint komutları boş repoda geçer |
+| PyTorch (CUDA 12.8), Unsloth, transformers, peft, trl, datasets | `uv run medlocal doctor` → RTX 5070, sm_120 |
+| Ollama kurulumu | `qwen3:0.6b` HTTP API üzerinden %100 GPU'da cevap verir |
+| ruff, mypy, pytest ayarları | lint komutları geçer |
 
 Öğrenilecekler: sanal ortam mantığı, CUDA/PyTorch sürüm eşleşmesi, VRAM'i ne doldurur.
 
@@ -76,6 +75,7 @@ Durum: `[ ]` başlamadı · `[~]` sürüyor · `[x]` bitti
 
 | İş | Çıktı |
 |---|---|
+| pnpm workspace, eslint, prettier | `pnpm install` ve lint temiz çalışır |
 | `shared/llm`: `TextGenerator`, `ImageDescriber` portları + Ollama adaptörü | entegrasyon testi |
 | `lab-report` modülü: PDF parser, referans aralığı kuralları, kritik değerler, açıklama use case'i | domain unit testleri + e2e |
 | `radiology` modülü: görüntü doğrulama, taslak use case'i | e2e |
