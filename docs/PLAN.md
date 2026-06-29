@@ -15,12 +15,12 @@ Durum: `[ ]` başlamadı · `[~]` sürüyor · `[x]` bitti
 
 Öğrenilecekler: sanal ortam mantığı, CUDA/PyTorch sürüm eşleşmesi, VRAM'i ne doldurur.
 
-## Faz 1 — Baseline `[ ]`
+## Faz 1 — Baseline `[~]`
 
 | İş | Çıktı |
 |---|---|
-| PubMedQA test split'ini sabitle | `data/splits/pubmedqa.json` (id listesi) |
-| Ham Qwen3-4B'yi test setinde ölç | `docs/results/baseline-text.md` |
+| PubMedQA test split'ini sabitle ✔ | `data/splits/pubmedqa.json` (id listesi) |
+| Ham Qwen3-4B'yi test setinde ölç ✔ | `docs/results/baseline-text.md` — accuracy 0.596, macro F1 0.510 |
 | IU X-Ray test split'ini sabitle | `data/splits/iu-xray.json` |
 | Ham Qwen3-VL-4B ve MedGemma-4B'yi ölç | `docs/results/baseline-vision.md` |
 
