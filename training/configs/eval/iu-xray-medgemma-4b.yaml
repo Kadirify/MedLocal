@@ -1,0 +1,6 @@
+name: iu-xray-medgemma-4b
+model_id: google/medgemma-4b-it
+dataset: iu-xray
+split: test
+batch_size: 4
+max_new_tokens: 160

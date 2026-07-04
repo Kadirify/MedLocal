@@ -3,19 +3,27 @@ import sys
 from collections.abc import Callable
 from pathlib import Path
 
+from medlocal_training.data.iu_xray import IuXraySource
 from medlocal_training.data.pubmedqa import PubMedQaSource, build_official_splits
+from medlocal_training.data.report_source import ReportSource
 from medlocal_training.data.source import DatasetSource
 from medlocal_training.data.splits import SplitIds
 from medlocal_training.device import CudaUnavailableError, require_cuda
-from medlocal_training.evaluation.config import EvaluationConfig
+from medlocal_training.evaluation.config import EvaluationConfig, ReportEvaluationConfig
 from medlocal_training.evaluation.label_logit_predictor import LabelLogitPredictor
+from medlocal_training.evaluation.report_run import evaluate_reports
 from medlocal_training.evaluation.run import evaluate
-from medlocal_training.models.loading import load_quantized_causal_lm
+from medlocal_training.evaluation.vision_chat_report_generator import VisionChatReportGenerator
+from medlocal_training.models.loading import load_quantized_causal_lm, load_quantized_vision_lm
 
 _RUNS_DIR = Path("runs")
 
 _DATASETS: dict[str, Callable[[SplitIds], DatasetSource]] = {
     "pubmedqa": PubMedQaSource,
+}
+
+_REPORT_DATASETS: dict[str, Callable[[], ReportSource]] = {
+    "iu-xray": IuXraySource,
 }
 
 
@@ -54,6 +62,25 @@ def _evaluate(args: argparse.Namespace) -> int:
     return 0
 
 
+def _evaluate_reports(args: argparse.Namespace) -> int:
+    require_cuda()
+    config = ReportEvaluationConfig.read(args.config)
+
+    source = _REPORT_DATASETS[config.dataset]()
+    model, processor = load_quantized_vision_lm(config.model_id)
+    generator = VisionChatReportGenerator(
+        model, processor, config.batch_size, config.max_new_tokens
+    )
+
+    metrics, run_dir = evaluate_reports(config, source, generator, _RUNS_DIR)
+    print(f"samples  {metrics.samples}")
+    print(f"rouge-l  {metrics.rouge_l:.3f}")
+    print(f"words    {metrics.mean_generated_words:.0f} generated")
+    print(f"         {metrics.mean_reference_words:.0f} reference")
+    print(f"run      {run_dir}")
+    return 0
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(prog="medlocal")
     commands = parser.add_subparsers(dest="command", required=True)
@@ -68,6 +95,10 @@ def main() -> int:
     evaluation = commands.add_parser("evaluate", help="score a model on a dataset split")
     evaluation.add_argument("config", type=Path)
     evaluation.set_defaults(handler=_evaluate)
+
+    reports = commands.add_parser("evaluate-reports", help="score generated X-ray findings")
+    reports.add_argument("config", type=Path)
+    reports.set_defaults(handler=_evaluate_reports)
 
     args = parser.parse_args()
     handler: Callable[[argparse.Namespace], int] = args.handler
