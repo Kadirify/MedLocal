@@ -15,14 +15,14 @@ Durum: `[ ]` başlamadı · `[~]` sürüyor · `[x]` bitti
 
 Öğrenilecekler: sanal ortam mantığı, CUDA/PyTorch sürüm eşleşmesi, VRAM'i ne doldurur.
 
-## Faz 1 — Baseline `[~]`
+## Faz 1 — Baseline `[x]`
 
 | İş | Çıktı |
 |---|---|
 | PubMedQA test split'ini sabitle ✔ | `data/splits/pubmedqa.json` (id listesi) |
 | Ham Qwen3-4B'yi test setinde ölç ✔ | `docs/results/baseline-text.md` — accuracy 0.596, macro F1 0.510 |
-| IU X-Ray test split'ini sabitle | `data/splits/iu-xray.json` |
-| Ham Qwen3-VL-4B ve MedGemma-4B'yi ölç | `docs/results/baseline-vision.md` |
+| IU X-Ray test split'ini sabitle ✔ | veri setiyle gelen R2Gen split'i (590 test çalışması) |
+| Ham Qwen3-VL-4B ve MedGemma-4B'yi ölç ✔ | `docs/results/baseline-vision.md` — ROUGE-L 0.157 / 0.278 |
 
 Öğrenilecekler: neden önce ölçüyoruz, train/val/test ayrımı, veri sızıntısı, accuracy / ROUGE / F1 ne anlatır ne anlatmaz.
 
@@ -53,6 +53,7 @@ Durum: `[ ]` başlamadı · `[~]` sürüyor · `[x]` bitti
 
 | İş | Çıktı |
 |---|---|
+| Bulgu düzeyinde klinik metrik (ROUGE-L tek başına yetmiyor) | normal/anormal ve bulgu F1'i, baseline'lar yeniden ölçülür |
 | Vision trainer (aynı portlar, yeni implementasyon) | `configs/vision-qwen3vl-4b.yaml` ile eğitim |
 | Test setinde ölçüm, MedGemma ile kıyas | `docs/results/finetuned-vision.md` |
 
