@@ -27,6 +27,10 @@ def to_prompt_messages(sample: QaSample, labels: Sequence[str]) -> list[ChatMess
     ]
 
 
+def to_training_messages(sample: QaSample, labels: Sequence[str]) -> list[ChatMessage]:
+    return [*to_prompt_messages(sample, labels), {"role": "assistant", "content": sample.answer}]
+
+
 def to_report_prompt_messages(sample: ReportSample) -> list[VisionChatMessage]:
     images = [{"type": "image", "image": image} for image in sample.images]
     return [

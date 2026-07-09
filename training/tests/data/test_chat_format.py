@@ -1,4 +1,4 @@
-from medlocal_training.data.chat_format import to_prompt_messages
+from medlocal_training.data.chat_format import to_prompt_messages, to_training_messages
 from medlocal_training.data.sample import QaSample
 
 SAMPLE = QaSample(id="1", question="Does X reduce Y?", context="X reduced Y.", answer="yes")
@@ -17,3 +17,12 @@ def test_prompt_never_contains_the_answer_field() -> None:
     messages = to_prompt_messages(sample, ("yes", "no"))
 
     assert all("SECRET" not in message["content"] for message in messages)
+
+
+def test_training_messages_end_with_the_answer_as_the_assistant_turn() -> None:
+    labels = ("yes", "no", "maybe")
+
+    messages = to_training_messages(SAMPLE, labels)
+
+    assert messages[:-1] == to_prompt_messages(SAMPLE, labels)
+    assert messages[-1] == {"role": "assistant", "content": "yes"}
