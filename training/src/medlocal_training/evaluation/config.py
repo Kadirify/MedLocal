@@ -12,6 +12,7 @@ class EvaluationConfig(BaseModel):
 
     name: str
     model_id: str
+    adapter_dir: Path | None = None
     dataset: Literal["pubmedqa"]
     splits_file: Path
     split: SplitName

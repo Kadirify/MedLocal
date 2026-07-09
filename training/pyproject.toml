@@ -59,12 +59,12 @@ python_version = "3.12"
 files = ["src"]
 
 [[tool.mypy.overrides]]
-module = ["torch.*", "datasets.*"]
+module = ["torch.*", "datasets.*", "unsloth", "unsloth.*"]
 ignore_missing_imports = true
 
 # transformers ships partial annotations that reject valid processor and generate calls
 [[tool.mypy.overrides]]
-module = ["transformers", "transformers.*"]
+module = ["transformers", "transformers.*", "peft", "peft.*", "trl", "trl.*"]
 follow_imports = "skip"
 
 [tool.pytest.ini_options]

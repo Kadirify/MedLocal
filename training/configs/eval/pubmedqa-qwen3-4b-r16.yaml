@@ -1,0 +1,7 @@
+name: pubmedqa-qwen3-4b-r16-validation
+model_id: unsloth/Qwen3-4B-Instruct-2507-bnb-4bit
+adapter_dir: runs/2026-09-19-pubmedqa-qwen3-4b-r16/adapter
+dataset: pubmedqa
+splits_file: ../data/splits/pubmedqa.json
+split: validation
+batch_size: 8

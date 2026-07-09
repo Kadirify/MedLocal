@@ -13,8 +13,11 @@ from medlocal_training.evaluation.config import EvaluationConfig, ReportEvaluati
 from medlocal_training.evaluation.label_logit_predictor import LabelLogitPredictor
 from medlocal_training.evaluation.report_run import evaluate_reports
 from medlocal_training.evaluation.run import evaluate
+from medlocal_training.evaluation.run_directory import RunDirectory
 from medlocal_training.evaluation.vision_chat_report_generator import VisionChatReportGenerator
 from medlocal_training.models.loading import load_quantized_causal_lm, load_quantized_vision_lm
+from medlocal_training.trainers.config import TextTrainingConfig
+from medlocal_training.trainers.text_qlora import train_text_qlora
 
 _RUNS_DIR = Path("runs")
 
@@ -40,7 +43,8 @@ def _doctor(_: argparse.Namespace) -> int:
 def _pubmedqa_splits(args: argparse.Namespace) -> int:
     splits = build_official_splits()
     splits.write(args.out)
-    print(f"validation {len(splits.validation)}  test {len(splits.test)}  -> {args.out}")
+    sizes = f"train {len(splits.train)}  validation {len(splits.validation)}"
+    print(f"{sizes}  test {len(splits.test)}  -> {args.out}")
     return 0
 
 
@@ -49,7 +53,7 @@ def _evaluate(args: argparse.Namespace) -> int:
     config = EvaluationConfig.read(args.config)
 
     source = _DATASETS[config.dataset](SplitIds.read(config.splits_file))
-    model, tokenizer = load_quantized_causal_lm(config.model_id)
+    model, tokenizer = load_quantized_causal_lm(config.model_id, config.adapter_dir)
     predictor = LabelLogitPredictor(model, tokenizer, config.batch_size)
 
     metrics, run_dir = evaluate(config, source, predictor, _RUNS_DIR)
@@ -59,6 +63,27 @@ def _evaluate(args: argparse.Namespace) -> int:
     )
     print(f"macro f1  {metrics.macro_f1:.3f}")
     print(f"run       {run_dir}")
+    return 0
+
+
+def _train_text(args: argparse.Namespace) -> int:
+    require_cuda()
+    config = TextTrainingConfig.read(args.config)
+
+    source = PubMedQaSource(
+        SplitIds.read(config.splits_file), config.artificial_train_samples, config.seed
+    )
+    run = RunDirectory(_RUNS_DIR, config.name)
+    run.write_config(config)
+
+    summary = train_text_qlora(
+        config, source.load("train"), source.load("validation"), source.labels, run.path
+    )
+    run.write_metrics(summary)
+    print(f"steps            {summary.steps}")
+    print(f"train loss       {summary.final_train_loss:.4f}")
+    print(f"validation loss  {summary.best_validation_loss:.4f} (best)")
+    print(f"adapter          {summary.adapter_dir}")
     return 0
 
 
@@ -95,6 +120,10 @@ def main() -> int:
     evaluation = commands.add_parser("evaluate", help="score a model on a dataset split")
     evaluation.add_argument("config", type=Path)
     evaluation.set_defaults(handler=_evaluate)
+
+    train_text = commands.add_parser("train-text", help="fine-tune a text model with QLoRA")
+    train_text.add_argument("config", type=Path)
+    train_text.set_defaults(handler=_train_text)
 
     reports = commands.add_parser("evaluate-reports", help="score generated X-ray findings")
     reports.add_argument("config", type=Path)
