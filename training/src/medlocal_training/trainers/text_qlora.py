@@ -5,7 +5,7 @@ from pathlib import Path
 
 from datasets import Dataset
 
-from medlocal_training.data.chat_format import to_training_messages
+from medlocal_training.data.chat_format import render_training_text
 from medlocal_training.data.sample import QaSample
 from medlocal_training.trainers.config import TextTrainingConfig
 
@@ -53,8 +53,7 @@ def train_text_qlora(
     )
 
     def as_text(samples: Sequence[QaSample]) -> Dataset:
-        conversations = [to_training_messages(sample, labels) for sample in samples]
-        texts = [tokenizer.apply_chat_template(c, tokenize=False) for c in conversations]
+        texts = [render_training_text(tokenizer, sample, labels) for sample in samples]
         return Dataset.from_dict({"text": texts})
 
     trainer = SFTTrainer(

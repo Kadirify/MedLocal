@@ -1,10 +1,20 @@
 from collections.abc import Sequence
-from typing import Any
+from typing import Any, Protocol
 
 from medlocal_training.data.report_sample import ReportSample
 from medlocal_training.data.sample import QaSample
 
 ChatMessage = dict[str, str]
+
+
+class ChatTemplateTokenizer(Protocol):
+    eos_token: str
+
+    def apply_chat_template(
+        self, conversation: list[ChatMessage], *, tokenize: bool, add_generation_prompt: bool
+    ) -> str: ...
+
+
 VisionChatMessage = dict[str, Any]
 
 _REPORT_SYSTEM = (
@@ -27,8 +37,18 @@ def to_prompt_messages(sample: QaSample, labels: Sequence[str]) -> list[ChatMess
     ]
 
 
-def to_training_messages(sample: QaSample, labels: Sequence[str]) -> list[ChatMessage]:
-    return [*to_prompt_messages(sample, labels), {"role": "assistant", "content": sample.answer}]
+def render_training_text(
+    tokenizer: ChatTemplateTokenizer, sample: QaSample, labels: Sequence[str]
+) -> str:
+    """The exact inference prompt followed by the answer.
+
+    Rendering the answer as an assistant message is not equivalent: Qwen3 templates put an
+    empty think block in front of it, so the model would learn a prefix it never sees later.
+    """
+    prompt = tokenizer.apply_chat_template(
+        to_prompt_messages(sample, labels), tokenize=False, add_generation_prompt=True
+    )
+    return f"{prompt}{sample.answer}{tokenizer.eos_token}"
 
 
 def to_report_prompt_messages(sample: ReportSample) -> list[VisionChatMessage]:

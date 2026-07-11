@@ -22,7 +22,7 @@ class RunDirectory:
         (self.path / "config.yaml").write_text(text, encoding="utf-8")
 
     def write_metrics(self, metrics: "DataclassInstance") -> None:
-        text = json.dumps(asdict(metrics), indent=2) + "\n"
+        text = json.dumps(asdict(metrics), indent=2, default=str) + "\n"
         (self.path / "metrics.json").write_text(text, encoding="utf-8")
 
     def write_predictions(self, rows: Iterable[Mapping[str, Any]]) -> None:
