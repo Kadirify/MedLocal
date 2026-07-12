@@ -38,14 +38,15 @@ Durum: `[ ]` başlamadı · `[~]` sürüyor · `[x]` bitti
 
 Öğrenilecekler: chat template, tokenizasyon, veri kalitesinin model kalitesine etkisi, sentetik veri riskleri.
 
-## Faz 3 — Metin modeli fine-tune `[ ]`
+## Faz 3 — Metin modeli fine-tune `[~]`
 
 | İş | Çıktı |
 |---|---|
-| QLoRA trainer (config'ten beslenir) | `uv run medlocal train configs/text-qwen3-4b.yaml` |
-| İlk eğitim + loss eğrisi | `training/runs/...` altında metrikler |
-| 2–3 hiperparametre denemesi (rank, lr, epoch) | karşılaştırma tablosu |
-| Test setinde ölçüm | `docs/results/finetuned-text.md`, baseline ile yan yana |
+| QLoRA trainer (config'ten beslenir) ✔ | `uv run medlocal train-text configs/train/<name>.yaml` |
+| İlk eğitim + loss eğrisi ✔ | `training/runs/...` altında metrikler |
+| 2–3 deney (veri karışımı, epoch) ✔ | karşılaştırma tablosu |
+| "maybe" sınıfı: oversampling / veri artırma, erken durdurma | macro F1'de iyileşme |
+| Test setinde ölçüm ✔ | `docs/results/finetuned-text.md` — accuracy 0.596 → 0.764, macro F1 0.510 → 0.542 |
 
 Öğrenilecekler: LoRA nedir, rank/alpha, 4-bit quantization, gradient accumulation, overfitting nasıl anlaşılır.
 
