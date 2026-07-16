@@ -11,8 +11,11 @@ class EvaluationConfig(BaseModel):
     model_config = ConfigDict(frozen=True, extra="forbid")
 
     name: str
+    predictor: Literal["label-logits", "ollama"] = "label-logits"
     model_id: str
     adapter_dir: Path | None = None
+    # "localhost" costs two seconds per request on Windows while IPv6 is tried first
+    ollama_url: str = "http://127.0.0.1:11434"
     dataset: Literal["pubmedqa"]
     splits_file: Path
     split: SplitName

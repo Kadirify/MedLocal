@@ -11,15 +11,21 @@ from medlocal_training.data.splits import SplitIds
 from medlocal_training.device import CudaUnavailableError, require_cuda
 from medlocal_training.evaluation.config import EvaluationConfig, ReportEvaluationConfig
 from medlocal_training.evaluation.label_logit_predictor import LabelLogitPredictor
+from medlocal_training.evaluation.ollama_answer_predictor import OllamaAnswerPredictor
+from medlocal_training.evaluation.predictor import AnswerPredictor
 from medlocal_training.evaluation.report_run import evaluate_reports
 from medlocal_training.evaluation.run import evaluate
 from medlocal_training.evaluation.run_directory import RunDirectory
 from medlocal_training.evaluation.vision_chat_report_generator import VisionChatReportGenerator
+from medlocal_training.export.config import GgufExportConfig
+from medlocal_training.export.gguf import LlamaCppNotFoundError, convert_to_gguf
+from medlocal_training.export.merge import merge_adapter
 from medlocal_training.models.loading import load_quantized_causal_lm, load_quantized_vision_lm
 from medlocal_training.trainers.config import TextTrainingConfig
 from medlocal_training.trainers.text_qlora import train_text_qlora
 
 _RUNS_DIR = Path("runs")
+_OLLAMA_TIMEOUT_SECONDS = 120.0
 
 _DATASETS: dict[str, Callable[[SplitIds], DatasetSource]] = {
     "pubmedqa": PubMedQaSource,
@@ -48,13 +54,27 @@ def _pubmedqa_splits(args: argparse.Namespace) -> int:
     return 0
 
 
-def _evaluate(args: argparse.Namespace) -> int:
+def _label_logit_predictor(config: EvaluationConfig) -> AnswerPredictor:
     require_cuda()
+    model, tokenizer = load_quantized_causal_lm(config.model_id, config.adapter_dir)
+    return LabelLogitPredictor(model, tokenizer, config.batch_size)
+
+
+def _ollama_predictor(config: EvaluationConfig) -> AnswerPredictor:
+    return OllamaAnswerPredictor(config.ollama_url, config.model_id, _OLLAMA_TIMEOUT_SECONDS)
+
+
+_PREDICTORS: dict[str, Callable[[EvaluationConfig], AnswerPredictor]] = {
+    "label-logits": _label_logit_predictor,
+    "ollama": _ollama_predictor,
+}
+
+
+def _evaluate(args: argparse.Namespace) -> int:
     config = EvaluationConfig.read(args.config)
 
     source = _DATASETS[config.dataset](SplitIds.read(config.splits_file))
-    model, tokenizer = load_quantized_causal_lm(config.model_id, config.adapter_dir)
-    predictor = LabelLogitPredictor(model, tokenizer, config.batch_size)
+    predictor = _PREDICTORS[config.predictor](config)
 
     metrics, run_dir = evaluate(config, source, predictor, _RUNS_DIR)
     print(f"samples   {metrics.samples}")
@@ -84,6 +104,17 @@ def _train_text(args: argparse.Namespace) -> int:
     print(f"train loss       {summary.final_train_loss:.4f}")
     print(f"validation loss  {summary.best_validation_loss:.4f} (best)")
     print(f"adapter          {summary.adapter_dir}")
+    return 0
+
+
+def _export_gguf(args: argparse.Namespace) -> int:
+    config = GgufExportConfig.read(args.config)
+    merged_dir = config.output_dir / "merged"
+    gguf_file = config.output_dir / f"{config.name}-{config.outtype}.gguf"
+
+    merge_adapter(config.base_model_id, config.adapter_dir, merged_dir)
+    convert_to_gguf(merged_dir, config.llama_cpp_dir, gguf_file, config.outtype)
+    print(f"gguf  {gguf_file}")
     return 0
 
 
@@ -125,6 +156,10 @@ def main() -> int:
     train_text.add_argument("config", type=Path)
     train_text.set_defaults(handler=_train_text)
 
+    export = commands.add_parser("export-gguf", help="merge an adapter and convert it to GGUF")
+    export.add_argument("config", type=Path)
+    export.set_defaults(handler=_export_gguf)
+
     reports = commands.add_parser("evaluate-reports", help="score generated X-ray findings")
     reports.add_argument("config", type=Path)
     reports.set_defaults(handler=_evaluate_reports)
@@ -133,7 +168,7 @@ def main() -> int:
     handler: Callable[[argparse.Namespace], int] = args.handler
     try:
         return handler(args)
-    except CudaUnavailableError as error:
+    except (CudaUnavailableError, LlamaCppNotFoundError) as error:
         print(error, file=sys.stderr)
         return 1
 

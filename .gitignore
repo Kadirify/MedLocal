@@ -35,3 +35,9 @@ Thumbs.db
 .idea/
 .vscode/*
 !.vscode/extensions.json
+
+# third-party checkouts
+tools/
+
+# exported models
+models/**/merged/

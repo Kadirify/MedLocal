@@ -1,0 +1,6 @@
+name: medlocal-pubmedqa
+base_model_id: Qwen/Qwen3-4B-Instruct-2507
+adapter_dir: runs/2026-09-19-pubmedqa-qwen3-4b-r16-mix400/adapter
+llama_cpp_dir: ../tools/llama.cpp
+output_dir: ../models/medlocal-pubmedqa
+outtype: q8_0
