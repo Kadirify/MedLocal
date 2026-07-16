@@ -1,0 +1,12 @@
+FROM ./medlocal-pubmedqa-q8_0.gguf
+
+TEMPLATE """{{- range .Messages }}<|im_start|>{{ .Role }}
+{{ .Content }}<|im_end|>
+{{ end }}<|im_start|>assistant
+"""
+
+SYSTEM """You answer biomedical research questions using only the given context. Reply with exactly one of: yes, no, maybe."""
+
+PARAMETER temperature 0
+PARAMETER num_ctx 4096
+PARAMETER stop <|im_end|>

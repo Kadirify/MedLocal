@@ -1,0 +1,7 @@
+name: pubmedqa-ollama-q8-test
+predictor: ollama
+model_id: medlocal-pubmedqa:q8_0
+dataset: pubmedqa
+splits_file: ../data/splits/pubmedqa.json
+split: test
+batch_size: 1
