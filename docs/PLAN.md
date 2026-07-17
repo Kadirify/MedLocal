@@ -60,15 +60,15 @@ Durum: `[ ]` başlamadı · `[~]` sürüyor · `[x]` bitti
 
 Öğrenilecekler: vision encoder + dil modeli nasıl birleşir, hangi katmanlar eğitilir, görüntü ön işleme.
 
-## Faz 5 — Dışa aktarma `[ ]`
+## Faz 5 — Dışa aktarma `[~]`
 
 | İş | Çıktı |
 |---|---|
-| LoRA adaptörünü taban modelle birleştir | merged safetensors |
-| GGUF'a çevir, Q4_K_M quantize et | `models/*.gguf` (gitignored) |
+| LoRA adaptörünü taban modelle birleştir ✔ | merged safetensors |
+| GGUF'a çevir ✔ (Q8_0; Q4_K_M `llama-quantize` gerektiriyor, bkz. ADR 0002) | `models/*/*.gguf` (gitignored) |
 | Vision model için `mmproj` dosyası | röntgen modeli Ollama'da görüntü alır |
-| Ollama `Modelfile` (system prompt, template, parametreler) | `ollama create medlocal-lab` çalışır |
-| Quantize modelin kalite kaybını ölç | fp16 vs Q4 tablosu |
+| Ollama `Modelfile` (system prompt, template, parametreler) ✔ | `medlocal-pubmedqa:q8_0` Ollama'da çalışıyor |
+| Quantize modelin kalite kaybını ölç ✔ | Ollama Q8_0: 0.766, NF4+adaptör: 0.764 |
 | Hugging Face Hub'a adaptör + model kartı | yayın sahibi tarafından yapılır |
 
 Öğrenilecekler: adaptör vs merged model, GGUF formatı, quantization seviyeleri ve bedeli, model kartı nasıl yazılır.

@@ -39,6 +39,17 @@ Accuracy rises by 16.8 points. The base model's main failure, hedging with "mayb
 
 "Maybe" is not solved. The model uses the label 13 times on the test split and is wrong every time, so macro F1 moves far less than accuracy. With roughly 38 training examples of that label this is a data problem before it is a modelling one.
 
+## Exported model
+
+The selected adapter was merged, converted to Q8_0 GGUF and served by Ollama as `medlocal-pubmedqa:q8_0` (see `docs/decisions/0002`). Scored through the Ollama HTTP API by generating the answer, on the same test split:
+
+| Served as | Accuracy | Macro F1 |
+|---|---|---|
+| NF4 base + adapter, label logits | 0.764 | 0.542 |
+| Q8_0 GGUF in Ollama, generated answer | 0.766 | 0.551 |
+
+The two agree on 470 of 500 answers, and every generated answer was one of the three labels. Merging, conversion and the Modelfile template did not change the model's behaviour.
+
 ## A failed first run
 
 The first training run scored 0.120 on validation and answered "maybe" for every question. The Qwen3 chat template puts an empty `<think></think>` block in front of an assistant message, while the generation prompt used at inference has none, so the model had learned a prefix it never saw again. The tell was a starting loss of 9.6 instead of about 1.0. Training text is now built as the exact inference prompt followed by the answer, and a unit test pins that.
