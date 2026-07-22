@@ -1,0 +1,319 @@
+# Typical adult reference intervals and critical limits, for generating synthetic reports and as
+# a fallback when a lab report does not print its own interval. Intervals differ between
+# laboratories, methods and populations; the interval printed on a report always wins.
+# Not validated for clinical use.
+#
+# Reference intervals follow the ranges published by Mayo Clinic Laboratories and the
+# MedlinePlus test pages. Critical limits follow commonly published hospital call lists.
+# `low_context` and `high_context` list general, non-diagnostic associations used to ground
+# generated explanations.
+
+panels:
+  complete_blood_count: [hemoglobin, hematocrit, red_blood_cells, mcv, white_blood_cells, platelets]
+  basic_metabolic: [glucose_fasting, urea_nitrogen, creatinine, sodium, potassium, calcium]
+  liver: [alt, ast, alp, total_bilirubin, albumin]
+  lipid: [total_cholesterol, ldl_cholesterol, hdl_cholesterol, triglycerides]
+  thyroid: [tsh, free_t4]
+  vitamins_and_iron: [ferritin, vitamin_b12, vitamin_d]
+  diabetes: [glucose_fasting, hba1c]
+  inflammation: [crp, white_blood_cells]
+
+analytes:
+  hemoglobin:
+    name: Hemoglobin
+    unit: g/dL
+    decimals: 1
+    measures: the protein in red blood cells that carries oxygen around the body
+    ranges:
+      male: {low: 13.2, high: 16.6}
+      female: {low: 11.6, high: 15.0}
+    critical: {low: 7.0, high: 20.0}
+    low_context: can be seen with low iron, vitamin B12 or folate, blood loss, or long-term health conditions
+    high_context: can be seen with dehydration, smoking, or living at high altitude
+
+  hematocrit:
+    name: Hematocrit
+    unit: "%"
+    decimals: 1
+    measures: the share of blood volume made up of red blood cells
+    ranges:
+      male: {low: 38.3, high: 48.6}
+      female: {low: 35.5, high: 44.9}
+    critical: {low: 20.0, high: 60.0}
+    low_context: usually moves together with hemoglobin and can be seen with anemia or recent blood loss
+    high_context: can be seen with dehydration or smoking
+
+  red_blood_cells:
+    name: Red blood cells
+    mentions: [red blood cell]
+    unit: million/µL
+    decimals: 2
+    measures: the number of red blood cells
+    ranges:
+      male: {low: 4.35, high: 5.65}
+      female: {low: 3.92, high: 5.13}
+    low_context: can be seen with anemia, blood loss, or low iron or vitamin levels
+    high_context: can be seen with dehydration or smoking
+
+  mcv:
+    name: MCV
+    mentions: [mcv, size of red blood cells, size of your red blood cells]
+    unit: fL
+    decimals: 0
+    measures: the average size of red blood cells
+    ranges:
+      any: {low: 80, high: 100}
+    low_context: smaller red blood cells can be seen with low iron
+    high_context: larger red blood cells can be seen with low vitamin B12 or folate, or with regular alcohol use
+
+  white_blood_cells:
+    name: White blood cells
+    mentions: [white blood cell]
+    unit: thousand/µL
+    decimals: 1
+    measures: the number of white blood cells, which help fight infection
+    ranges:
+      any: {low: 3.4, high: 9.6}
+    critical: {low: 2.0, high: 30.0}
+    low_context: can be seen after viral infections or with some medicines
+    high_context: can be seen with infection, inflammation, physical stress, or smoking
+
+  platelets:
+    name: Platelets
+    mentions: [platelet]
+    unit: thousand/µL
+    decimals: 0
+    measures: the number of platelets, which help blood to clot
+    ranges:
+      any: {low: 150, high: 400}
+    critical: {low: 20, high: 1000}
+    low_context: can be seen after viral infections or with some medicines
+    high_context: can be seen with inflammation, infection, or low iron
+
+  glucose_fasting:
+    name: Fasting glucose
+    mentions: [glucose, blood sugar]
+    unit: mg/dL
+    decimals: 0
+    measures: the amount of sugar in the blood after not eating for at least eight hours
+    ranges:
+      any: {low: 70, high: 99}
+    critical: {low: 50, high: 450}
+    low_context: can be seen after a long time without food or with some diabetes medicines
+    high_context: can be seen if the sample was not truly fasting, with stress or illness, or with prediabetes or diabetes
+
+  hba1c:
+    name: HbA1c
+    unit: "%"
+    decimals: 1
+    measures: the average blood sugar level over roughly the past three months
+    ranges:
+      any: {low: null, high: 5.6}
+    high_context: values from 5.7 to 6.4 are in the range often called prediabetes, and 6.5 or above is in the range used when assessing diabetes
+
+  urea_nitrogen:
+    name: Blood urea nitrogen
+    mentions: [urea, bun]
+    unit: mg/dL
+    decimals: 0
+    measures: a waste product that the kidneys remove from the blood
+    ranges:
+      any: {low: 7, high: 20}
+    low_context: can be seen with a low-protein diet or drinking a lot of fluid
+    high_context: can be seen with dehydration, a high-protein diet, or reduced kidney function
+
+  creatinine:
+    name: Creatinine
+    unit: mg/dL
+    decimals: 2
+    measures: a waste product from muscles that the kidneys filter out
+    ranges:
+      male: {low: 0.74, high: 1.35}
+      female: {low: 0.59, high: 1.04}
+    low_context: can be seen with low muscle mass
+    high_context: can be seen with dehydration, high muscle mass, intense exercise, or reduced kidney function
+
+  sodium:
+    name: Sodium
+    unit: mmol/L
+    decimals: 0
+    measures: a mineral that helps control fluid balance
+    ranges:
+      any: {low: 135, high: 145}
+    critical: {low: 120, high: 160}
+    low_context: can be seen with some medicines such as water tablets, or with drinking very large amounts of water
+    high_context: can be seen with dehydration
+
+  potassium:
+    name: Potassium
+    unit: mmol/L
+    decimals: 1
+    measures: a mineral that nerves and muscles, including the heart, need to work
+    ranges:
+      any: {low: 3.6, high: 5.2}
+    critical: {low: 2.5, high: 6.5}
+    low_context: can be seen with vomiting, diarrhea, or some medicines such as water tablets
+    high_context: can be seen when the sample was damaged during collection, with some medicines, or with reduced kidney function
+
+  calcium:
+    name: Calcium
+    unit: mg/dL
+    decimals: 1
+    measures: a mineral needed for bones, muscles and nerves
+    ranges:
+      any: {low: 8.8, high: 10.2}
+    critical: {low: 6.5, high: 13.0}
+    low_context: can be seen with low vitamin D or low albumin
+    high_context: can be seen with dehydration, some supplements, or an overactive parathyroid gland
+
+  alt:
+    name: ALT
+    unit: U/L
+    decimals: 0
+    measures: an enzyme found mostly in the liver
+    ranges:
+      any: {low: null, high: 55}
+    high_context: can be seen with fatty liver, alcohol use, some medicines, viral infections, or recent hard exercise
+
+  ast:
+    name: AST
+    unit: U/L
+    decimals: 0
+    measures: an enzyme found in the liver and in muscle
+    ranges:
+      any: {low: null, high: 48}
+    high_context: can be seen with liver irritation, alcohol use, some medicines, or recent hard exercise
+
+  alp:
+    name: Alkaline phosphatase
+    mentions: [alkaline phosphatase, alp]
+    unit: U/L
+    decimals: 0
+    measures: an enzyme related to the liver, bile ducts and bones
+    ranges:
+      any: {low: 40, high: 129}
+    low_context: mildly low values are often not significant
+    high_context: can be seen with bile duct or liver conditions, bone growth or healing, or pregnancy
+
+  total_bilirubin:
+    name: Total bilirubin
+    mentions: [bilirubin]
+    unit: mg/dL
+    decimals: 1
+    measures: a yellow substance made when old red blood cells are broken down and cleared by the liver
+    ranges:
+      any: {low: null, high: 1.2}
+    high_context: can be seen with a common harmless inherited trait called Gilbert syndrome, with fasting, or with liver or bile duct conditions
+
+  albumin:
+    name: Albumin
+    unit: g/dL
+    decimals: 1
+    measures: the main protein in blood, made by the liver
+    ranges:
+      any: {low: 3.5, high: 5.0}
+    low_context: can be seen with inflammation, poor nutrition, or liver or kidney conditions
+    high_context: can be seen with dehydration
+
+  total_cholesterol:
+    name: Total cholesterol
+    unit: mg/dL
+    decimals: 0
+    measures: the total amount of cholesterol in the blood
+    ranges:
+      any: {low: null, high: 199}
+    high_context: can be related to diet, body weight, physical activity, family history, or thyroid function
+
+  ldl_cholesterol:
+    name: LDL cholesterol
+    mentions: [ldl]
+    unit: mg/dL
+    decimals: 0
+    measures: the cholesterol that can build up in artery walls
+    ranges:
+      any: {low: null, high: 99}
+    high_context: can be related to diet, body weight, physical activity, or family history; what counts as a good level depends on a person's overall heart risk
+
+  hdl_cholesterol:
+    name: HDL cholesterol
+    mentions: [hdl]
+    unit: mg/dL
+    decimals: 0
+    measures: the cholesterol that helps carry other cholesterol away from the arteries
+    ranges:
+      male: {low: 40, high: null}
+      female: {low: 50, high: null}
+    low_context: can be related to low physical activity, smoking, or excess body weight
+
+  triglycerides:
+    name: Triglycerides
+    unit: mg/dL
+    decimals: 0
+    measures: a type of fat in the blood
+    ranges:
+      any: {low: null, high: 149}
+    high_context: can be seen if the sample was not fasting, with alcohol, sugary foods, excess body weight, or high blood sugar
+
+  tsh:
+    name: TSH
+    unit: mIU/L
+    decimals: 2
+    measures: the signal from the brain that tells the thyroid gland how hard to work
+    ranges:
+      any: {low: 0.3, high: 4.2}
+    low_context: can be seen when the thyroid is more active than needed or with too high a dose of thyroid medicine
+    high_context: can be seen when the thyroid is less active than needed
+
+  free_t4:
+    name: Free T4
+    mentions: [free t4, t4]
+    unit: ng/dL
+    decimals: 2
+    measures: the main hormone released by the thyroid gland
+    ranges:
+      any: {low: 0.9, high: 1.7}
+    low_context: can be seen when the thyroid is less active than needed
+    high_context: can be seen when the thyroid is more active than needed
+
+  ferritin:
+    name: Ferritin
+    unit: ng/mL
+    decimals: 0
+    measures: the amount of iron stored in the body
+    ranges:
+      male: {low: 24, high: 336}
+      female: {low: 11, high: 307}
+    low_context: points to low iron stores, which can come from diet, heavy periods, or blood loss
+    high_context: can be seen with inflammation or infection, liver conditions, or too much stored iron
+
+  vitamin_b12:
+    name: Vitamin B12
+    mentions: [b12]
+    unit: pg/mL
+    decimals: 0
+    measures: a vitamin needed for nerves and for making red blood cells
+    ranges:
+      any: {low: 180, high: 914}
+    low_context: can be seen with diets low in animal products, some stomach medicines, or reduced absorption in the gut
+    high_context: is most often related to supplements
+
+  vitamin_d:
+    name: Vitamin D (25-hydroxy)
+    mentions: [vitamin d]
+    unit: ng/mL
+    decimals: 0
+    measures: the body's vitamin D stores, which matter for bones
+    ranges:
+      any: {low: 20, high: 50}
+    low_context: is common with little sun exposure, darker skin, or during winter
+    high_context: is most often related to supplements
+
+  crp:
+    name: C-reactive protein
+    mentions: [c-reactive protein, crp]
+    unit: mg/L
+    decimals: 1
+    measures: a protein that rises when there is inflammation somewhere in the body
+    ranges:
+      any: {low: null, high: 8.0}
+    high_context: can be seen with infections, injuries, or long-term inflammatory conditions; it does not show where the inflammation is
