@@ -1,0 +1,13 @@
+name: lab-explanations
+catalog_file: ../reference/analytes.yaml
+output_file: ../data/synthetic/lab-explanations.jsonl
+seed: 20260919
+teacher_model: qwen3:14b
+teacher_url: http://127.0.0.1:11434
+temperature: 0.7
+max_attempts: 3
+# test and validation come first so that growing the training split later never changes them
+sizes:
+  test: 150
+  validation: 100
+  train: 1000

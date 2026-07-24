@@ -20,6 +20,11 @@ from medlocal_training.evaluation.vision_chat_report_generator import VisionChat
 from medlocal_training.export.config import GgufExportConfig
 from medlocal_training.export.gguf import LlamaCppNotFoundError, convert_to_gguf
 from medlocal_training.export.merge import merge_adapter
+from medlocal_training.labs.analyte import AnalyteCatalog
+from medlocal_training.labs.config import LabDatasetConfig
+from medlocal_training.labs.dataset import build_examples
+from medlocal_training.labs.explanation_writer import OllamaExplanationWriter
+from medlocal_training.labs.synthetic import SyntheticReportGenerator
 from medlocal_training.models.loading import load_quantized_causal_lm, load_quantized_vision_lm
 from medlocal_training.trainers.config import TextTrainingConfig
 from medlocal_training.trainers.text_qlora import train_text_qlora
@@ -107,6 +112,22 @@ def _train_text(args: argparse.Namespace) -> int:
     return 0
 
 
+def _build_lab_dataset(args: argparse.Namespace) -> int:
+    config = LabDatasetConfig.read(args.config)
+    generator = SyntheticReportGenerator(AnalyteCatalog.read(config.catalog_file), config.seed)
+    writer = OllamaExplanationWriter(
+        config.teacher_url, config.teacher_model, config.temperature, _OLLAMA_TIMEOUT_SECONDS
+    )
+
+    summary = build_examples(
+        generator, writer, config.sizes, config.max_attempts, config.output_file
+    )
+    print(f"written   {summary.written} (already present {summary.already_present})")
+    print(f"gave up   {summary.gave_up}")
+    print(f"rejected  {summary.rejected_attempts}")
+    return 0
+
+
 def _export_gguf(args: argparse.Namespace) -> int:
     config = GgufExportConfig.read(args.config)
     merged_dir = config.output_dir / "merged"
@@ -155,6 +176,12 @@ def main() -> int:
     train_text = commands.add_parser("train-text", help="fine-tune a text model with QLoRA")
     train_text.add_argument("config", type=Path)
     train_text.set_defaults(handler=_train_text)
+
+    lab_dataset = commands.add_parser(
+        "build-lab-dataset", help="write synthetic lab reports with teacher explanations"
+    )
+    lab_dataset.add_argument("config", type=Path)
+    lab_dataset.set_defaults(handler=_build_lab_dataset)
 
     export = commands.add_parser("export-gguf", help="merge an adapter and convert it to GGUF")
     export.add_argument("config", type=Path)
