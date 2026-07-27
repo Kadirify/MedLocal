@@ -4,9 +4,12 @@
 
 ```mermaid
 flowchart LR
+    C[(reference/analytes.yaml)]
+
     subgraph offline[Offline: training/]
-        D[Public datasets] --> P[Data prep]
-        P --> T[QLoRA fine-tuning]
+        C --> G[Synthetic reports]
+        G --> W[Teacher explanations + safety checks]
+        W --> T[QLoRA fine-tuning]
         T --> E[Evaluation]
         T --> X[Merge + GGUF export]
     end
@@ -15,56 +18,48 @@ flowchart LR
     M --> O[Ollama]
 
     subgraph runtime[Runtime: apps/]
-        W[Next.js web] --> A[NestJS API]
+        U[Next.js web] --> A[NestJS API]
         A --> O
+        C --> A
     end
 ```
 
-The two halves share no code. The contract between them is the GGUF file, its Modelfile, and the prompt format the model was trained on.
+The two halves share no code. The contract between them is the GGUF file, its Modelfile, the prompt format the model was trained on, and the analyte catalog.
 
 ## Runtime request flow
 
-Lab report:
-
-1. Web uploads a PDF to the API.
-2. `LabReportParser` extracts analyte, value, unit.
-3. Domain rules compare each value with its `ReferenceRange` and mark critical values. No model involved.
-4. `ExplainLabReport` builds a prompt from the flagged results and streams an explanation through the `TextGenerator` port.
-5. Response carries values, ranges, flags, explanation, disclaimer and model version.
-
-Chest X-ray:
-
-1. Web uploads an image.
-2. API validates format and size, then calls the `ImageDescriber` port.
-3. Model output is parsed into `Finding[]` plus a free-text impression; unparseable output is an error, not a result.
+1. Web uploads a lab PDF to the API.
+2. `LabReportParser` extracts analyte, value, unit and the printed reference range.
+3. Domain rules compare each value with its `ReferenceRange` (the printed one, else the catalog's) and mark critical values. No model involved.
+4. A critical value produces a fixed "seek medical care" message that never passes through the model.
+5. `ExplainLabReport` renders the flagged results in the training prompt format and streams an explanation through the `TextGenerator` port.
+6. Response carries values, ranges, flags, explanation, disclaimer and model version.
 
 ## Ports and adapters
 
 | Port | Consumer | Adapter |
 |---|---|---|
 | `TextGenerator` | lab-report use cases | Ollama chat API |
-| `ImageDescriber` | radiology use cases | Ollama chat API with images |
 | `LabReportParser` | lab-report use cases | PDF text extraction |
-| `ReferenceRangeRepository` | lab-report domain service | YAML file |
-| `DatasetSource` | training pipeline | PubMedQA, MedMCQA, IU X-Ray, synthetic |
-| `ModelExporter` | training CLI | GGUF, Hugging Face Hub |
+| `ReferenceRangeRepository` | lab-report domain service | `reference/analytes.yaml` |
+| `ExplanationWriter` | dataset builder | teacher model through Ollama |
+| `DatasetSource` | benchmark pipeline | PubMedQA |
+| `AnswerPredictor` | benchmark evaluation | label logits (transformers), Ollama |
 
-Swapping Ollama for llama.cpp server or vLLM means writing one adapter. Adding a lab panel means adding a YAML file.
+Swapping Ollama for a llama.cpp server or vLLM means writing one adapter. Adding an analyte or a panel means editing the catalog.
 
 ## Training pipeline
 
 ```
-config.yaml -> DatasetSource -> ChatFormatter -> Trainer -> Evaluator -> ModelExporter
+analytes.yaml -> SyntheticReportGenerator -> ExplanationWriter -> explanation checks -> JSONL
+JSONL -> QLoRA trainer -> evaluation (rule checks, overlap with teacher) -> merge -> GGUF -> Ollama
 ```
 
-Each arrow is a typed boundary. Stages are selected by name from the config and composed in `cli.py`.
+Every stage is driven by a YAML file in `training/configs/` and composed in `cli.py`. PubMedQA runs through the same trainer and exporter; it is the benchmark that proved the pipeline end to end before the product model was trained.
 
 ## Model choices
 
 | Role | Model | Why |
 |---|---|---|
-| Text base | Qwen3-4B | fits QLoRA in 12 GB with headroom, permissive licence |
-| Vision base | Qwen3-VL-4B | same family, permissive licence, trainable on 12 GB |
-| Vision reference | MedGemma-4B | already trained on chest X-rays; used only as a comparison point |
-
-Choices are revisited in Phase 1 once baseline numbers exist, and recorded in `docs/decisions/`.
+| Student | Qwen3-4B-Instruct-2507 | fits QLoRA in 12 GB with headroom, Apache 2.0 |
+| Teacher | Qwen3-14B through Ollama | runs locally in 12 GB at 4-bit, Apache 2.0, so its outputs can be used for training |

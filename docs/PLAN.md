@@ -1,5 +1,7 @@
 # MedLocal Yol Haritası
 
+Kapsam: **sadece tahlil açıklama.** Röntgen tarafı 2026-09-19'da kapsamdan çıkarıldı; baseline ölçümleri ve kodu git geçmişinde (`feat/vision-baseline`) duruyor.
+
 Her faz bir branch'te yapılır, doğrulanır, sonra bir sonrakine geçilir. "Çıktı" sütunundaki şey yoksa faz bitmemiştir.
 
 Durum: `[ ]` başlamadı · `[~]` sürüyor · `[x]` bitti
@@ -8,88 +10,81 @@ Durum: `[ ]` başlamadı · `[~]` sürüyor · `[x]` bitti
 
 | İş | Çıktı |
 |---|---|
-| uv + Python 3.12, `training/pyproject.toml` | `uv sync` temiz çalışır |
-| PyTorch (CUDA 12.8), Unsloth, transformers, peft, trl, datasets | `uv run medlocal doctor` → RTX 5070, sm_120 |
-| Ollama kurulumu | `qwen3:0.6b` HTTP API üzerinden %100 GPU'da cevap verir |
-| ruff, mypy, pytest ayarları | lint komutları geçer |
+| uv + Python 3.12, PyTorch (CUDA 12.8), Unsloth, transformers, peft, trl | `uv run medlocal doctor` → RTX 5070, sm_120 |
+| Ollama | modeller HTTP API üzerinden %100 GPU'da cevap verir |
+| ruff, mypy, pytest | lint komutları geçer |
 
-Öğrenilecekler: sanal ortam mantığı, CUDA/PyTorch sürüm eşleşmesi, VRAM'i ne doldurur.
+## Faz 1 — Hattı bir benchmark ile kurmak `[x]`
 
-## Faz 1 — Baseline `[x]`
-
-| İş | Çıktı |
-|---|---|
-| PubMedQA test split'ini sabitle ✔ | `data/splits/pubmedqa.json` (id listesi) |
-| Ham Qwen3-4B'yi test setinde ölç ✔ | `docs/results/baseline-text.md` — accuracy 0.596, macro F1 0.510 |
-| IU X-Ray test split'ini sabitle ✔ | veri setiyle gelen R2Gen split'i (590 test çalışması) |
-| Ham Qwen3-VL-4B ve MedGemma-4B'yi ölç ✔ | `docs/results/baseline-vision.md` — ROUGE-L 0.157 / 0.278 |
-
-Öğrenilecekler: neden önce ölçüyoruz, train/val/test ayrımı, veri sızıntısı, accuracy / ROUGE / F1 ne anlatır ne anlatmaz.
-
-## Faz 2 — Veri `[ ]`
+PubMedQA burada ürün değil, hattın doğru çalıştığını kanıtlayan ölçü çubuğu.
 
 | İş | Çıktı |
 |---|---|
-| `DatasetSource` portu + PubMedQA, MedMCQA implementasyonları | unit testli loader'lar |
-| Chat formatına çevirici | örnek → `messages` dönüşümü, testli |
-| Sentetik tahlil → açıklama veri seti üretimi | `data/synthetic/lab-explanations.jsonl` + üretim script'i |
-| IU X-Ray görüntü + rapor eşleştirme, temizlik | vision eğitim seti |
-| `data/README.md` | her veri setinin kaynağı ve lisansı |
+| Resmi test split'i, baseline ölçümü | `docs/results/baseline-text.md` — accuracy 0.596 |
+| QLoRA trainer, iki deney | `docs/results/finetuned-text.md` — accuracy 0.764 |
+| Adaptör birleştirme → GGUF → Ollama, eşdeğerlik ölçümü | `medlocal-pubmedqa:q8_0`, Ollama'da 0.766 |
 
-Öğrenilecekler: chat template, tokenizasyon, veri kalitesinin model kalitesine etkisi, sentetik veri riskleri.
+Öğrenilenler: baseline'ın önemi, macro F1, veri dengesizliği, chat template tuzağı, gradient accumulation, adaptör/merge/GGUF.
 
-## Faz 3 — Metin modeli fine-tune `[~]`
+Açık kalan: "maybe" sınıfı (F1 0). Ürünü etkilemediği için ertelendi.
 
-| İş | Çıktı |
-|---|---|
-| QLoRA trainer (config'ten beslenir) ✔ | `uv run medlocal train-text configs/train/<name>.yaml` |
-| İlk eğitim + loss eğrisi ✔ | `training/runs/...` altında metrikler |
-| 2–3 deney (veri karışımı, epoch) ✔ | karşılaştırma tablosu |
-| "maybe" sınıfı: oversampling / veri artırma, erken durdurma | macro F1'de iyileşme |
-| Test setinde ölçüm ✔ | `docs/results/finetuned-text.md` — accuracy 0.596 → 0.764, macro F1 0.510 → 0.542 |
-
-Öğrenilecekler: LoRA nedir, rank/alpha, 4-bit quantization, gradient accumulation, overfitting nasıl anlaşılır.
-
-## Faz 4 — Görüntü modeli fine-tune `[ ]`
+## Faz 2 — Tahlil verisi `[~]`
 
 | İş | Çıktı |
 |---|---|
-| Bulgu düzeyinde klinik metrik (ROUGE-L tek başına yetmiyor) | normal/anormal ve bulgu F1'i, baseline'lar yeniden ölçülür |
-| Vision trainer (aynı portlar, yeni implementasyon) | `configs/vision-qwen3vl-4b.yaml` ile eğitim |
-| Test setinde ölçüm, MedGemma ile kıyas | `docs/results/finetuned-vision.md` |
+| Analit kataloğu: aralıklar, kritik eşikler, doğrulanmış arka plan metni ✔ | `reference/analytes.yaml` (28 analit, 8 panel) |
+| Deterministik bayraklama ✔ | `labs/report.py`, sınır değer testleri |
+| Sentetik rapor üretici (seed'li, kritik değerlerden uzak) ✔ | `labs/synthetic.py` |
+| Açıklama güvenlik kontrolleri ✔ | `labs/explanation_checks.py` — 7 kural |
+| Öğretmen modelle veri seti üretimi | `data/synthetic/lab-explanations.jsonl` (1000 / 100 / 150) |
+| Elle kalite incelemesi | rastgele 30 örneğin okunması, bulguların nota dökülmesi |
 
-Öğrenilecekler: vision encoder + dil modeli nasıl birleşir, hangi katmanlar eğitilir, görüntü ön işleme.
+Öğrenilecekler: distillation, sentetik veri riskleri, kural tabanlı filtreleme, öğretmene "kopya kâğıdı" vermek.
 
-## Faz 5 — Dışa aktarma `[~]`
+## Faz 3 — Tahlil açıklama modeli `[ ]`
 
 | İş | Çıktı |
 |---|---|
-| LoRA adaptörünü taban modelle birleştir ✔ | merged safetensors |
-| GGUF'a çevir ✔ (Q8_0; Q4_K_M `llama-quantize` gerektiriyor, bkz. ADR 0002) | `models/*/*.gguf` (gitignored) |
-| Vision model için `mmproj` dosyası | röntgen modeli Ollama'da görüntü alır |
-| Ollama `Modelfile` (system prompt, template, parametreler) ✔ | `medlocal-pubmedqa:q8_0` Ollama'da çalışıyor |
-| Quantize modelin kalite kaybını ölç ✔ | Ollama Q8_0: 0.766, NF4+adaptör: 0.764 |
+| Üretim tabanlı değerlendirme: kural geçme oranı, öğretmenle ROUGE-L, uzunluk | `medlocal evaluate-explanations` |
+| Ham Qwen3-4B baseline (öğretmenin arka plan notları olmadan) | `docs/results/baseline-lab.md` |
+| QLoRA eğitimi, erken durdurma | adaptör |
+| Test ölçümü, baseline ve öğretmenle yan yana | `docs/results/finetuned-lab.md` |
+| Zor vakalar: hepsi normal, tek sınır değer, 5+ bayrak | ayrı tablo |
+
+## Faz 4 — Dışa aktarma `[ ]`
+
+| İş | Çıktı |
+|---|---|
+| Birleştir → Q8_0 GGUF → Modelfile | `medlocal-lab:q8_0` Ollama'da |
+| Ollama üzerinden aynı test | eşdeğerlik tablosu |
+| (İsteğe bağlı) Q4_K_M, `llama-quantize` ile | boyut / kalite tablosu |
 | Hugging Face Hub'a adaptör + model kartı | yayın sahibi tarafından yapılır |
 
-Öğrenilecekler: adaptör vs merged model, GGUF formatı, quantization seviyeleri ve bedeli, model kartı nasıl yazılır.
-
-## Faz 6 — API (NestJS) `[ ]`
+## Faz 5 — API (NestJS) `[ ]`
 
 | İş | Çıktı |
 |---|---|
-| pnpm workspace, eslint, prettier | `pnpm install` ve lint temiz çalışır |
-| `shared/llm`: `TextGenerator`, `ImageDescriber` portları + Ollama adaptörü | entegrasyon testi |
-| `lab-report` modülü: PDF parser, referans aralığı kuralları, kritik değerler, açıklama use case'i | domain unit testleri + e2e |
-| `radiology` modülü: görüntü doğrulama, taslak use case'i | e2e |
-| Streaming cevap, timeout, hata sözleşmesi | OpenAPI dokümanı |
+| pnpm workspace, eslint, prettier | `pnpm install` ve lint temiz |
+| `shared/llm`: `TextGenerator` portu + Ollama adaptörü (streaming, timeout) | entegrasyon testi |
+| `lab-report` domain: `LabReport`, `ReferenceRange`, bayraklama, kritik değerler | Python tarafıyla aynı sınır değer testleri |
+| Katalog okuyucu (`reference/analytes.yaml`) | `ReferenceRangeRepository` |
+| PDF parser (önce metin tabanlı PDF, sonra e-Nabız formatı) | örnek PDF'lerle testler |
+| `ExplainLabReport` use case, eğitimdeki prompt formatıyla birebir | e2e test, OpenAPI |
 
-## Faz 7 — Web (Next.js) `[ ]`
+## Faz 6 — Web (Next.js) `[ ]`
 
 | İş | Çıktı |
 |---|---|
-| Tahlil yükleme + sonuç ekranı (değer, aralık, bayrak, açıklama) | çalışan akış |
-| Röntgen yükleme + taslak ekranı | çalışan akış |
-| Uyarı metni, model sürümü, TR/EN arayüz | her sonuç ekranında görünür |
+| PDF yükleme, sonuç tablosu (değer, aralık, bayrak) | çalışan akış |
+| Açıklamanın akarak gelmesi, kritik değer uyarısı | — |
+| Uyarı metni, model sürümü, TR/EN arayüz | her sonuç ekranında |
+
+## Faz 7 — Türkçe `[ ]`
+
+| İş | Çıktı |
+|---|---|
+| Türkçe açıklama verisi (öğretmenle, aynı kontrollerin Türkçesi) | ikinci veri seti |
+| İki dilli model ya da ayrı adaptör kararı | ADR |
 
 ## Faz 8 — Paketleme ve yayın `[ ]`
 
@@ -104,5 +99,5 @@ Durum: `[ ]` başlamadı · `[~]` sürüyor · `[x]` bitti
 
 - Tanı, tedavi önerisi, ilaç dozu.
 - Gerçek hasta verisi ve kimlik doğrulamalı veri setleri.
-- 12 GB VRAM'e sığmayan modeller, bulut eğitimi.
-- Göğüs röntgeni dışındaki modaliteler (ilk sürümde).
+- Görüntüleme (röntgen, MR, BT).
+- 12 GB VRAM'e sığmayan modellerin eğitimi, bulut eğitimi.

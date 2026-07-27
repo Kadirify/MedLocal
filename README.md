@@ -1,11 +1,8 @@
 # MedLocal
 
-A medical assistant that runs entirely on your own machine.
+A lab report explainer that runs entirely on your own machine.
 
-- **Lab report explainer** — upload a lab PDF, get out-of-range values flagged by deterministic rules and explained in plain language by a fine-tuned local model.
-- **Chest X-ray report drafting** — upload an image, get a findings draft from a fine-tuned vision-language model.
-
-No cloud calls, no patient data leaving the device.
+Upload a lab PDF and get out-of-range values flagged by deterministic rules, then explained in plain language by a small fine-tuned model. No cloud calls, no patient data leaving the device.
 
 > MedLocal is a research and learning project. It is not a medical device and does not provide diagnosis or treatment advice.
 

@@ -18,6 +18,7 @@ coverage/
 data/*
 !data/README.md
 !data/splits/
+!data/synthetic/
 training/runs/
 unsloth_compiled_cache/
 *.gguf
