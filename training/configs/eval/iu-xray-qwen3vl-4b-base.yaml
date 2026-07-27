@@ -1,6 +1,0 @@
-name: iu-xray-qwen3vl-4b-base
-model_id: Qwen/Qwen3-VL-4B-Instruct
-dataset: iu-xray
-split: test
-batch_size: 4
-max_new_tokens: 160

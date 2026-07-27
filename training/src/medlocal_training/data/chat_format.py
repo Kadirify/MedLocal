@@ -1,7 +1,6 @@
 from collections.abc import Sequence
-from typing import Any, Protocol
+from typing import Protocol
 
-from medlocal_training.data.report_sample import ReportSample
 from medlocal_training.data.sample import QaSample
 
 ChatMessage = dict[str, str]
@@ -13,16 +12,6 @@ class ChatTemplateTokenizer(Protocol):
     def apply_chat_template(
         self, conversation: list[ChatMessage], *, tokenize: bool, add_generation_prompt: bool
     ) -> str: ...
-
-
-VisionChatMessage = dict[str, Any]
-
-_REPORT_SYSTEM = (
-    "You are a radiology assistant drafting chest X-ray reports. "
-    "Write only the findings section as a few plain sentences. "
-    "Describe what is visible and do not give a diagnosis or recommendations."
-)
-_REPORT_REQUEST = "Write the findings section for this chest X-ray study."
 
 
 def to_prompt_messages(sample: QaSample, labels: Sequence[str]) -> list[ChatMessage]:
@@ -49,11 +38,3 @@ def render_training_text(
         to_prompt_messages(sample, labels), tokenize=False, add_generation_prompt=True
     )
     return f"{prompt}{sample.answer}{tokenizer.eos_token}"
-
-
-def to_report_prompt_messages(sample: ReportSample) -> list[VisionChatMessage]:
-    images = [{"type": "image", "image": image} for image in sample.images]
-    return [
-        {"role": "system", "content": [{"type": "text", "text": _REPORT_SYSTEM}]},
-        {"role": "user", "content": [*images, {"type": "text", "text": _REPORT_REQUEST}]},
-    ]

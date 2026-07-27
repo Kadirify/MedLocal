@@ -41,7 +41,7 @@ Accuracy rises by 16.8 points. The base model's main failure, hedging with "mayb
 
 ## Exported model
 
-The selected adapter was merged, converted to Q8_0 GGUF and served by Ollama as `medlocal-pubmedqa:q8_0` (see `docs/decisions/0002`). Scored through the Ollama HTTP API by generating the answer, on the same test split:
+The selected adapter was merged, converted to Q8_0 GGUF and served by Ollama as `medlocal-pubmedqa:q8_0` (see `docs/decisions/0001`). Scored through the Ollama HTTP API by generating the answer, on the same test split:
 
 | Served as | Accuracy | Macro F1 |
 |---|---|---|
