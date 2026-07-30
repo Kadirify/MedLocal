@@ -79,3 +79,9 @@ def test_flags_markdown() -> None:
 
 def test_flags_a_one_line_answer() -> None:
     assert "length" in failed_checks(LOW_FERRITIN, "Your ferritin is low. See your doctor.")
+
+
+def test_flags_input_tokens_copied_into_the_text() -> None:
+    text = GOOD.replace("Your ferritin is low", "Your ferritin is LOW")
+
+    assert failed_checks(LOW_FERRITIN, text) == ["no_flag_tokens"]

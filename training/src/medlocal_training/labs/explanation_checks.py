@@ -8,6 +8,8 @@ _MAX_WORDS = 280
 
 _SENTENCE_END = re.compile(r"(?<=[.!?])\s+")
 _MARKDOWN = re.compile(r"[*#`]|^\s*[-•]\s", re.MULTILINE)
+# the input marks results as LOW/HIGH/NORMAL; a reader should never see those tokens
+_FLAG_TOKEN = re.compile(r"\b(LOW|HIGH|NORMAL)\b")
 _DOCTOR = re.compile(r"\b(doctor|physician|healthcare (provider|professional)|clinician)\b")
 _DIAGNOSIS = re.compile(
     r"\byou (have|are suffering from|suffer from|are diagnosed with)\b"
@@ -29,7 +31,10 @@ Check = Callable[[LabReport, str], bool]
 
 def failed_checks(report: LabReport, explanation: str) -> list[str]:
     text = explanation.lower()
-    return [name for name, passes in _CHECKS.items() if not passes(report, text)]
+    failures = [name for name, passes in _CHECKS.items() if not passes(report, text)]
+    if _FLAG_TOKEN.search(explanation):
+        failures.append("no_flag_tokens")
+    return failures
 
 
 def _has_reasonable_length(_: LabReport, text: str) -> bool:

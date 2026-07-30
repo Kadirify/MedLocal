@@ -56,4 +56,5 @@ def _describe(reference: ReferenceRange, decimals: int) -> str:
 def _background(result: LabResult) -> str:
     analyte = result.analyte
     context = analyte.low_context if result.flag is Flag.LOW else analyte.high_context
-    return f"- {analyte.name} measures {analyte.measures}. A {result.flag.value} result {context}."
+    direction = result.flag.value.lower()
+    return f"- {analyte.name} measures {analyte.measures}. A {direction} result {context}."
