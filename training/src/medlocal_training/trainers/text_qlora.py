@@ -6,7 +6,7 @@ from pathlib import Path
 from datasets import Dataset
 
 from medlocal_training.data.chat_format import render_training_text
-from medlocal_training.data.sample import QaSample
+from medlocal_training.data.training_example import TrainingExample
 from medlocal_training.trainers.config import TextTrainingConfig
 
 _LORA_TARGETS = ["q_proj", "k_proj", "v_proj", "o_proj", "gate_proj", "up_proj", "down_proj"]
@@ -26,9 +26,8 @@ class TrainingSummary:
 
 def train_text_qlora(
     config: TextTrainingConfig,
-    train: Sequence[QaSample],
-    validation: Sequence[QaSample],
-    labels: Sequence[str],
+    train: Sequence[TrainingExample],
+    validation: Sequence[TrainingExample],
     run_dir: Path,
 ) -> TrainingSummary:
     # unsloth patches transformers and trl when imported: it stays out of the evaluation
@@ -37,6 +36,7 @@ def train_text_qlora(
     from unsloth.chat_templates import train_on_responses_only
 
     # isort: split
+    from transformers import EarlyStoppingCallback
     from trl import SFTConfig, SFTTrainer
 
     model, tokenizer = FastLanguageModel.from_pretrained(
@@ -52,8 +52,8 @@ def train_text_qlora(
         random_state=config.seed,
     )
 
-    def as_text(samples: Sequence[QaSample]) -> Dataset:
-        texts = [render_training_text(tokenizer, sample, labels) for sample in samples]
+    def as_text(examples: Sequence[TrainingExample]) -> Dataset:
+        texts = [render_training_text(tokenizer, e.prompt, e.answer) for e in examples]
         return Dataset.from_dict({"text": texts})
 
     trainer = SFTTrainer(
@@ -80,10 +80,16 @@ def train_text_qlora(
             logging_steps=config.logging_steps,
             eval_strategy="steps",
             eval_steps=config.eval_steps,
-            save_strategy="no",
+            save_strategy="steps",
+            save_steps=config.eval_steps,
+            save_total_limit=1,
+            load_best_model_at_end=True,
+            metric_for_best_model="eval_loss",
+            greater_is_better=False,
             seed=config.seed,
             report_to="none",
         ),
+        callbacks=[EarlyStoppingCallback(config.early_stopping_patience)],
     )
     trainer = train_on_responses_only(
         trainer, instruction_part=_USER_TURN, response_part=_ASSISTANT_TURN

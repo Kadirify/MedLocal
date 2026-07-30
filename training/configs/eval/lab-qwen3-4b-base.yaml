@@ -1,0 +1,8 @@
+name: lab-qwen3-4b-base
+explainer: causal-lm
+model_id: unsloth/Qwen3-4B-Instruct-2507-bnb-4bit
+examples_file: ../data/synthetic/lab-explanations.jsonl
+catalog_file: ../reference/analytes.yaml
+split: test
+batch_size: 8
+max_new_tokens: 400

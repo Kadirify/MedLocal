@@ -38,7 +38,7 @@ def test_training_text_is_the_inference_prompt_followed_by_the_answer() -> None:
     tokenizer = ThinkingTemplateTokenizer()
     labels = ("yes", "no", "maybe")
 
-    text = render_training_text(tokenizer, SAMPLE, labels)
+    text = render_training_text(tokenizer, to_prompt_messages(SAMPLE, labels), SAMPLE.answer)
 
     prompt = tokenizer.apply_chat_template(
         to_prompt_messages(SAMPLE, labels), tokenize=False, add_generation_prompt=True

@@ -5,6 +5,7 @@ import yaml
 from pydantic import (
     BaseModel,
     ConfigDict,
+    Field,
     NonNegativeFloat,
     NonNegativeInt,
     PositiveFloat,
@@ -20,14 +21,28 @@ class LoraSettings(BaseModel):
     dropout: NonNegativeFloat
 
 
+class PubMedQaData(BaseModel):
+    model_config = ConfigDict(frozen=True, extra="forbid")
+
+    kind: Literal["pubmedqa"]
+    splits_file: Path
+    artificial_train_samples: NonNegativeInt
+
+
+class LabExplanationData(BaseModel):
+    model_config = ConfigDict(frozen=True, extra="forbid")
+
+    kind: Literal["lab-explanations"]
+    examples_file: Path
+    catalog_file: Path
+
+
 class TextTrainingConfig(BaseModel):
     model_config = ConfigDict(frozen=True, extra="forbid")
 
     name: str
     base_model_id: str
-    dataset: Literal["pubmedqa"]
-    splits_file: Path
-    artificial_train_samples: NonNegativeInt
+    data: PubMedQaData | LabExplanationData = Field(discriminator="kind")
     seed: int
     max_seq_length: PositiveInt
     lora: LoraSettings
@@ -38,6 +53,7 @@ class TextTrainingConfig(BaseModel):
     warmup_steps: NonNegativeInt
     logging_steps: PositiveInt
     eval_steps: PositiveInt
+    early_stopping_patience: PositiveInt
 
     @classmethod
     def read(cls, path: Path) -> "TextTrainingConfig":

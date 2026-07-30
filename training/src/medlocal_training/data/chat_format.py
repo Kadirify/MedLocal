@@ -27,14 +27,12 @@ def to_prompt_messages(sample: QaSample, labels: Sequence[str]) -> list[ChatMess
 
 
 def render_training_text(
-    tokenizer: ChatTemplateTokenizer, sample: QaSample, labels: Sequence[str]
+    tokenizer: ChatTemplateTokenizer, prompt: list[ChatMessage], answer: str
 ) -> str:
     """The exact inference prompt followed by the answer.
 
     Rendering the answer as an assistant message is not equivalent: Qwen3 templates put an
     empty think block in front of it, so the model would learn a prefix it never sees later.
     """
-    prompt = tokenizer.apply_chat_template(
-        to_prompt_messages(sample, labels), tokenize=False, add_generation_prompt=True
-    )
-    return f"{prompt}{sample.answer}{tokenizer.eos_token}"
+    rendered = tokenizer.apply_chat_template(prompt, tokenize=False, add_generation_prompt=True)
+    return f"{rendered}{answer}{tokenizer.eos_token}"

@@ -17,13 +17,16 @@ from medlocal_training.export.config import GgufExportConfig
 from medlocal_training.export.gguf import LlamaCppNotFoundError, convert_to_gguf
 from medlocal_training.export.merge import merge_adapter
 from medlocal_training.labs.analyte import AnalyteCatalog
-from medlocal_training.labs.config import LabDatasetConfig
-from medlocal_training.labs.dataset import build_examples
+from medlocal_training.labs.config import ExplanationEvaluationConfig, LabDatasetConfig
+from medlocal_training.labs.dataset import build_examples, read_examples
+from medlocal_training.labs.evaluation import score_explanations
+from medlocal_training.labs.explainer import CausalLmExplainer, Explainer, OllamaExplainer
 from medlocal_training.labs.explanation_writer import OllamaExplanationWriter
 from medlocal_training.labs.synthetic import SyntheticReportGenerator
 from medlocal_training.models.loading import load_quantized_causal_lm
 from medlocal_training.trainers.config import TextTrainingConfig
 from medlocal_training.trainers.text_qlora import train_text_qlora
+from medlocal_training.trainers.training_sets import load_training_examples
 
 _RUNS_DIR = Path("runs")
 _OLLAMA_TIMEOUT_SECONDS = 120.0
@@ -87,15 +90,12 @@ def _train_text(args: argparse.Namespace) -> int:
     require_cuda()
     config = TextTrainingConfig.read(args.config)
 
-    source = PubMedQaSource(
-        SplitIds.read(config.splits_file), config.artificial_train_samples, config.seed
-    )
+    train = load_training_examples(config.data, "train", config.seed)
+    validation = load_training_examples(config.data, "validation", config.seed)
+
     run = RunDirectory(_RUNS_DIR, config.name)
     run.write_config(config)
-
-    summary = train_text_qlora(
-        config, source.load("train"), source.load("validation"), source.labels, run.path
-    )
+    summary = train_text_qlora(config, train, validation, run.path)
     run.write_metrics(summary)
     print(f"steps            {summary.steps}")
     print(f"train loss       {summary.final_train_loss:.4f}")
@@ -117,6 +117,49 @@ def _build_lab_dataset(args: argparse.Namespace) -> int:
     print(f"written   {summary.written} (already present {summary.already_present})")
     print(f"gave up   {summary.gave_up}")
     print(f"rejected  {summary.rejected_attempts}")
+    return 0
+
+
+def _causal_lm_explainer(config: ExplanationEvaluationConfig) -> Explainer:
+    require_cuda()
+    model, tokenizer = load_quantized_causal_lm(config.model_id, config.adapter_dir)
+    return CausalLmExplainer(model, tokenizer, config.batch_size, config.max_new_tokens)
+
+
+def _ollama_explainer(config: ExplanationEvaluationConfig) -> Explainer:
+    return OllamaExplainer(
+        config.ollama_url, config.model_id, config.max_new_tokens, _OLLAMA_TIMEOUT_SECONDS
+    )
+
+
+_EXPLAINERS: dict[str, Callable[[ExplanationEvaluationConfig], Explainer]] = {
+    "causal-lm": _causal_lm_explainer,
+    "ollama": _ollama_explainer,
+}
+
+
+def _evaluate_explanations(args: argparse.Namespace) -> int:
+    config = ExplanationEvaluationConfig.read(args.config)
+    catalog = AnalyteCatalog.read(config.catalog_file)
+    examples = [e for e in read_examples(config.examples_file) if e.split == config.split]
+    reports = [example.to_report(catalog) for example in examples]
+
+    generated = _EXPLAINERS[config.explainer](config).explain(reports)
+    metrics = score_explanations(reports, [e.explanation for e in examples], generated)
+
+    run = RunDirectory(_RUNS_DIR, config.name)
+    run.write_config(config)
+    run.write_metrics(metrics)
+    run.write_predictions(
+        {"id": example.id, "expected": example.explanation, "predicted": text}
+        for example, text in zip(examples, generated, strict=True)
+    )
+    print(f"samples             {metrics.samples}")
+    print(f"passed every check  {metrics.passed_every_check:.3f}")
+    print(f"failures            {metrics.failure_rate_per_check}")
+    print(f"rouge-l to teacher  {metrics.rouge_l_to_teacher:.3f}")
+    print(f"mean words          {metrics.mean_words:.0f}")
+    print(f"run                 {run.path}")
     return 0
 
 
@@ -155,6 +198,12 @@ def main() -> int:
     )
     lab_dataset.add_argument("config", type=Path)
     lab_dataset.set_defaults(handler=_build_lab_dataset)
+
+    explanations = commands.add_parser(
+        "evaluate-explanations", help="score generated lab explanations"
+    )
+    explanations.add_argument("config", type=Path)
+    explanations.set_defaults(handler=_evaluate_explanations)
 
     export = commands.add_parser("export-gguf", help="merge an adapter and convert it to GGUF")
     export.add_argument("config", type=Path)
