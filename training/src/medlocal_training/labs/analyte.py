@@ -40,6 +40,7 @@ class Analyte(_Frozen):
     measures: str
     ranges: dict[str, ReferenceRange]
     critical: CriticalLimits = CriticalLimits()
+    aliases: tuple[str, ...] = ()
     mentions: tuple[str, ...] = ()
     low_context: str | None = None
     high_context: str | None = None

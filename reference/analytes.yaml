@@ -5,6 +5,8 @@
 #
 # Reference intervals follow the ranges published by Mayo Clinic Laboratories and the
 # MedlinePlus test pages. Critical limits follow commonly published hospital call lists.
+# `aliases` are the labels a printed report may use for the analyte, matched exactly after
+# lower-casing. `mentions` are the words an explanation may use for it.
 # `low_context` and `high_context` list general, non-diagnostic associations used to ground
 # generated explanations.
 
@@ -21,6 +23,7 @@ panels:
 analytes:
   hemoglobin:
     name: Hemoglobin
+    aliases: [hgb, hb]
     unit: g/dL
     decimals: 1
     measures: the protein in red blood cells that carries oxygen around the body
@@ -33,6 +36,7 @@ analytes:
 
   hematocrit:
     name: Hematocrit
+    aliases: [hct, hematokrit]
     unit: "%"
     decimals: 1
     measures: the share of blood volume made up of red blood cells
@@ -45,6 +49,7 @@ analytes:
 
   red_blood_cells:
     name: Red blood cells
+    aliases: [rbc, eritrosit]
     mentions: [red blood cell]
     unit: million/µL
     decimals: 2
@@ -68,6 +73,7 @@ analytes:
 
   white_blood_cells:
     name: White blood cells
+    aliases: [wbc, lökosit, lokosit]
     mentions: [white blood cell]
     unit: thousand/µL
     decimals: 1
@@ -80,6 +86,7 @@ analytes:
 
   platelets:
     name: Platelets
+    aliases: [plt, trombosit]
     mentions: [platelet]
     unit: thousand/µL
     decimals: 0
@@ -92,6 +99,7 @@ analytes:
 
   glucose_fasting:
     name: Fasting glucose
+    aliases: [glucose, glukoz, glukoz (açlık), açlık kan şekeri]
     mentions: [glucose, blood sugar]
     unit: mg/dL
     decimals: 0
@@ -104,6 +112,7 @@ analytes:
 
   hba1c:
     name: HbA1c
+    aliases: [hemoglobin a1c]
     unit: "%"
     decimals: 1
     measures: the average blood sugar level over roughly the past three months
@@ -113,6 +122,7 @@ analytes:
 
   urea_nitrogen:
     name: Blood urea nitrogen
+    aliases: [bun, kan üre azotu]
     mentions: [urea, bun]
     unit: mg/dL
     decimals: 0
@@ -124,6 +134,7 @@ analytes:
 
   creatinine:
     name: Creatinine
+    aliases: [kreatinin]
     unit: mg/dL
     decimals: 2
     measures: a waste product from muscles that the kidneys filter out
@@ -135,6 +146,7 @@ analytes:
 
   sodium:
     name: Sodium
+    aliases: [sodyum, na]
     unit: mmol/L
     decimals: 0
     measures: a mineral that helps control fluid balance
@@ -146,6 +158,7 @@ analytes:
 
   potassium:
     name: Potassium
+    aliases: [potasyum, k]
     unit: mmol/L
     decimals: 1
     measures: a mineral that nerves and muscles, including the heart, need to work
@@ -157,6 +170,7 @@ analytes:
 
   calcium:
     name: Calcium
+    aliases: [kalsiyum, ca]
     unit: mg/dL
     decimals: 1
     measures: a mineral needed for bones, muscles and nerves
@@ -168,6 +182,7 @@ analytes:
 
   alt:
     name: ALT
+    aliases: [sgpt, alanin aminotransferaz]
     unit: U/L
     decimals: 0
     measures: an enzyme found mostly in the liver
@@ -177,6 +192,7 @@ analytes:
 
   ast:
     name: AST
+    aliases: [sgot, aspartat aminotransferaz]
     unit: U/L
     decimals: 0
     measures: an enzyme found in the liver and in muscle
@@ -186,6 +202,7 @@ analytes:
 
   alp:
     name: Alkaline phosphatase
+    aliases: [alp, alkalen fosfataz]
     mentions: [alkaline phosphatase, alp]
     unit: U/L
     decimals: 0
@@ -197,6 +214,7 @@ analytes:
 
   total_bilirubin:
     name: Total bilirubin
+    aliases: [bilirubin total, bilirubin (total), total bilirübin]
     mentions: [bilirubin]
     unit: mg/dL
     decimals: 1
@@ -207,6 +225,7 @@ analytes:
 
   albumin:
     name: Albumin
+    aliases: [albümin]
     unit: g/dL
     decimals: 1
     measures: the main protein in blood, made by the liver
@@ -217,6 +236,7 @@ analytes:
 
   total_cholesterol:
     name: Total cholesterol
+    aliases: [cholesterol, kolesterol, total kolesterol]
     unit: mg/dL
     decimals: 0
     measures: the total amount of cholesterol in the blood
@@ -226,6 +246,7 @@ analytes:
 
   ldl_cholesterol:
     name: LDL cholesterol
+    aliases: [ldl, ldl kolesterol]
     mentions: [ldl]
     unit: mg/dL
     decimals: 0
@@ -236,6 +257,7 @@ analytes:
 
   hdl_cholesterol:
     name: HDL cholesterol
+    aliases: [hdl, hdl kolesterol]
     mentions: [hdl]
     unit: mg/dL
     decimals: 0
@@ -247,6 +269,7 @@ analytes:
 
   triglycerides:
     name: Triglycerides
+    aliases: [tg, trigliserid]
     unit: mg/dL
     decimals: 0
     measures: a type of fat in the blood
@@ -266,6 +289,7 @@ analytes:
 
   free_t4:
     name: Free T4
+    aliases: [ft4, st4, serbest t4]
     mentions: [free t4, t4]
     unit: ng/dL
     decimals: 2
@@ -288,6 +312,7 @@ analytes:
 
   vitamin_b12:
     name: Vitamin B12
+    aliases: [b12, b12 vitamini]
     mentions: [b12]
     unit: pg/mL
     decimals: 0
@@ -299,6 +324,7 @@ analytes:
 
   vitamin_d:
     name: Vitamin D (25-hydroxy)
+    aliases: [vitamin d, d vitamini, 25-oh vitamin d]
     mentions: [vitamin d]
     unit: ng/mL
     decimals: 0
@@ -310,6 +336,7 @@ analytes:
 
   crp:
     name: C-reactive protein
+    aliases: [crp]
     mentions: [c-reactive protein, crp]
     unit: mg/L
     decimals: 1
