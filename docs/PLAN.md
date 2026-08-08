@@ -60,23 +60,23 @@ Açık kalan: "maybe" sınıfı (F1 0). Ürünü etkilemediği için ertelendi.
 | (İsteğe bağlı) Q4_K_M, `llama-quantize` ile | boyut / kalite tablosu |
 | Hugging Face Hub'a adaptör + model kartı | yayın sahibi tarafından yapılır |
 
-## Faz 5 — API (NestJS) `[ ]`
+## Faz 5 — API (NestJS) `[~]`
 
 | İş | Çıktı |
 |---|---|
-| pnpm workspace, eslint, prettier | `pnpm install` ve lint temiz |
-| `shared/llm`: `TextGenerator` portu + Ollama adaptörü (streaming, timeout) | entegrasyon testi |
-| `lab-report` domain: `LabReport`, `ReferenceRange`, bayraklama, kritik değerler | Python tarafıyla aynı sınır değer testleri |
-| Katalog okuyucu (`reference/analytes.yaml`) | `ReferenceRangeRepository` |
-| PDF parser (önce metin tabanlı PDF, sonra e-Nabız formatı) | örnek PDF'lerle testler |
-| `ExplainLabReport` use case, eğitimdeki prompt formatıyla birebir | e2e test, OpenAPI |
+| pnpm workspace, eslint, prettier ✔ | `pnpm install` ve lint temiz |
+| `shared/llm`: `TextGenerator` portu + Ollama adaptörü (streaming, timeout) ✔ | entegrasyon testi |
+| `lab-report` domain: `LabReport`, `ReferenceRange`, bayraklama, kritik değerler ✔ | Python tarafıyla aynı sınır değer testleri |
+| Katalog okuyucu (`reference/analytes.yaml`) ✔ | `ReferenceRangeRepository` |
+| PDF parser: metin tabanlı PDF ✔, gerçek e-Nabız / özel lab çıktılarıyla deneme | örnek PDF'lerle testler |
+| `ExplainLabReport` use case, eğitimdeki prompt formatıyla birebir ✔ | e2e test, OpenAPI |
 
-## Faz 6 — Web (Next.js) `[ ]`
+## Faz 6 — Web (Next.js) `[~]`
 
 | İş | Çıktı |
 |---|---|
-| PDF yükleme, sonuç tablosu (değer, aralık, bayrak) | çalışan akış |
-| Açıklamanın akarak gelmesi, kritik değer uyarısı | — |
+| PDF yükleme, sonuç tablosu (değer, aralık, bayrak) ✔ | çalışan akış |
+| Açıklamanın akarak gelmesi, kritik değer uyarısı ✔ | — |
 | Uyarı metni, model sürümü, TR/EN arayüz | her sonuç ekranında |
 
 ## Faz 7 — Türkçe `[ ]`
