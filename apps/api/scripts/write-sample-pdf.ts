@@ -2,7 +2,7 @@ import { mkdirSync, writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { renderLabReportPdf } from '../test/sample-lab-report.ts';
 
-const output = resolve(import.meta.dirname, '../../../samples/sample-lab-report.pdf');
+const output = resolve(import.meta.dirname, '../../web/public/sample-lab-report.pdf');
 
 const pdf = await renderLabReportPdf([
   ['Hemoglobin', '10.8', 'g/dL', '11.6 - 15.0'],

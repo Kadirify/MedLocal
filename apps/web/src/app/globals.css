@@ -1,0 +1,21 @@
+@import "tailwindcss";
+
+/* System fonts only: a web font would be fetched from a third party at build time. */
+@theme inline {
+  --font-sans: ui-sans-serif, system-ui, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --color-ink: #16202a;
+  --color-muted: #5b6875;
+  --color-line: #dfe5ea;
+  --color-surface: #ffffff;
+  --color-canvas: #f4f7f9;
+  --color-accent: #0f6e6e;
+  --color-low: #1d5fa8;
+  --color-high: #b4531a;
+  --color-critical: #a8201a;
+}
+
+body {
+  background: var(--color-canvas);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+}

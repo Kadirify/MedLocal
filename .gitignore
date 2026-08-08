@@ -42,6 +42,3 @@ tools/
 
 # exported models
 models/**/merged/
-
-# generated sample report
-samples/
