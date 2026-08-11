@@ -87,4 +87,4 @@ Training commands are listed in [`CONTRIBUTING.md`](CONTRIBUTING.md) and driven 
 
 ## Licence
 
-TBD
+[MIT](LICENSE) for the code, the analyte catalog and the synthetic dataset. Base and teacher models keep their own licences (Qwen3, Apache 2.0).
