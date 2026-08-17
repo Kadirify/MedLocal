@@ -15,3 +15,5 @@ Everything under `data/` is gitignored except this file and `splits/`. Datasets 
 Regenerate with `uv run medlocal pubmedqa-splits --out ../data/splits/pubmedqa.json` from `training/`.
 
 `synthetic/lab-explanations.jsonl` holds generated reports, never real ones. Values are drawn around the catalog's reference ranges and kept clear of critical limits. Each explanation was written by the teacher model with vetted background text and kept only if it passed every rule in `labs/explanation_checks.py`. The split is part of each row; test and validation rows are generated first so that growing the training split never changes them.
+
+Build of 2026-09-19: 1,224 of 1,250 planned reports (976 train, 99 validation, 149 test). The teacher failed the checks five times in a row on the other 26, which skew towards reports with many flagged results, so the hardest cases are slightly under-represented.
