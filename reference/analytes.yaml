@@ -100,7 +100,7 @@ analytes:
   glucose_fasting:
     name: Fasting glucose
     aliases: [glucose, glukoz, glukoz (açlık), açlık kan şekeri]
-    mentions: [glucose, blood sugar]
+    mentions: [glucose]
     unit: mg/dL
     decimals: 0
     measures: the amount of sugar in the blood after not eating for at least eight hours

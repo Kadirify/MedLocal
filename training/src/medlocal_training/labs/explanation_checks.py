@@ -1,5 +1,6 @@
 import re
 from collections.abc import Callable
+from functools import cache
 
 from medlocal_training.labs.report import Flag, LabReport, LabResult
 
@@ -80,13 +81,20 @@ def _direction_is_kept(result: LabResult, text: str) -> bool:
 
 def _sentences_about(result: LabResult, text: str, *, include_next: bool = False) -> list[str]:
     """Sentences naming the analyte; the direction often follows in the next one ("A low level")."""
-    terms = result.analyte.search_terms()
+    names = _whole_words(result.analyte.search_terms())
     sentences = _SENTENCE_END.split(text)
     return [
         f"{sentence} {following}" if include_next else sentence
         for sentence, following in zip(sentences, [*sentences[1:], ""], strict=True)
-        if any(term in sentence for term in terms)
+        if names.search(sentence)
     ]
+
+
+@cache
+def _whole_words(terms: tuple[str, ...]) -> re.Pattern[str]:
+    # "ast" must not match inside "fasting" or "waste"; a plural "s" is still the same analyte
+    alternatives = "|".join(re.escape(term) for term in terms)
+    return re.compile(rf"\b(?:{alternatives})s?\b")
 
 
 _CHECKS: dict[str, Check] = {

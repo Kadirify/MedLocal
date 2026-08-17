@@ -85,3 +85,20 @@ def test_flags_input_tokens_copied_into_the_text() -> None:
     text = GOOD.replace("Your ferritin is low", "Your ferritin is LOW")
 
     assert failed_checks(LOW_FERRITIN, text) == ["no_flag_tokens"]
+
+
+def test_a_short_name_is_not_found_inside_other_words() -> None:
+    report = _report(ast=90, glucose_fasting=85)
+    text = (
+        "One of your results is higher than expected. Fasting glucose is within the normal "
+        "range, and so is the waste product your kidneys clear. " + GOOD.split(". ", 1)[1]
+    )
+
+    assert "mentions_flagged" in failed_checks(report, text)
+
+
+def test_a_plural_still_names_the_analyte() -> None:
+    report = _report(platelets=90)
+    text = GOOD.replace("Ferritin", "Platelets").replace("ferritin", "platelets")
+
+    assert "mentions_flagged" not in failed_checks(report, text)
