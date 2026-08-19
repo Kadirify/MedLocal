@@ -28,7 +28,7 @@ PubMedQA burada ürün değil, hattın doğru çalıştığını kanıtlayan öl
 
 Açık kalan: "maybe" sınıfı (F1 0). Ürünü etkilemediği için ertelendi.
 
-## Faz 2 — Tahlil verisi `[~]`
+## Faz 2 — Tahlil verisi `[x]`
 
 | İş | Çıktı |
 |---|---|
@@ -36,27 +36,28 @@ Açık kalan: "maybe" sınıfı (F1 0). Ürünü etkilemediği için ertelendi.
 | Deterministik bayraklama ✔ | `labs/report.py`, sınır değer testleri |
 | Sentetik rapor üretici (seed'li, kritik değerlerden uzak) ✔ | `labs/synthetic.py` |
 | Açıklama güvenlik kontrolleri ✔ | `labs/explanation_checks.py` — 7 kural |
-| Öğretmen modelle veri seti üretimi | `data/synthetic/lab-explanations.jsonl` (1000 / 100 / 150) |
-| Elle kalite incelemesi | rastgele 30 örneğin okunması, bulguların nota dökülmesi |
+| Öğretmen modelle veri seti üretimi ✔ | `data/synthetic/lab-explanations.jsonl` (976 / 99 / 149) |
+| Elle kalite incelemesi ✔ (kısmi) | üç kontrol hatası bulundu ve düzeltildi, bkz. `docs/results/lab-explainer.md` |
 
 Öğrenilecekler: distillation, sentetik veri riskleri, kural tabanlı filtreleme, öğretmene "kopya kâğıdı" vermek.
 
-## Faz 3 — Tahlil açıklama modeli `[ ]`
+## Faz 3 — Tahlil açıklama modeli `[~]`
 
 | İş | Çıktı |
 |---|---|
-| Üretim tabanlı değerlendirme: kural geçme oranı, öğretmenle ROUGE-L, uzunluk | `medlocal evaluate-explanations` |
-| Ham Qwen3-4B baseline (öğretmenin arka plan notları olmadan) | `docs/results/baseline-lab.md` |
-| QLoRA eğitimi, erken durdurma | adaptör |
-| Test ölçümü, baseline ve öğretmenle yan yana | `docs/results/finetuned-lab.md` |
+| Üretim tabanlı değerlendirme: kural geçme oranı, öğretmenle ROUGE-L, uzunluk ✔ | `medlocal evaluate-explanations` |
+| Ham Qwen3-4B baseline ✔ | kural geçme oranı 0.779 |
+| QLoRA eğitimi, erken durdurma ✔ | adaptör, doğrulama loss'u 0.295 |
+| Test ölçümü ✔ | `docs/results/lab-explainer.md` — 0.779 → 0.940 |
+| Kuraldan geçemeyen 9 çıktının ve rastgele 30 çıktının elle okunması | notlar |
 | Zor vakalar: hepsi normal, tek sınır değer, 5+ bayrak | ayrı tablo |
 
-## Faz 4 — Dışa aktarma `[ ]`
+## Faz 4 — Dışa aktarma `[~]`
 
 | İş | Çıktı |
 |---|---|
-| Birleştir → Q8_0 GGUF → Modelfile | `medlocal-lab:q8_0` Ollama'da |
-| Ollama üzerinden aynı test | eşdeğerlik tablosu |
+| Birleştir → Q8_0 GGUF → Modelfile ✔ | `medlocal-lab:q8_0` Ollama'da, API bunu kullanıyor |
+| Ollama üzerinden aynı test ✔ | 0.946 |
 | (İsteğe bağlı) Q4_K_M, `llama-quantize` ile | boyut / kalite tablosu |
 | Hugging Face Hub'a adaptör + model kartı | yayın sahibi tarafından yapılır |
 

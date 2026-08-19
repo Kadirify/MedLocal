@@ -36,7 +36,17 @@ The student never sees the background text the teacher was given. It has to carr
 
 ## Results so far
 
-The pipeline was first proven end to end on a public benchmark, PubMedQA (official test split, 500 questions):
+**Lab explainer**, 149 held-out synthetic reports. An explanation passes when it satisfies every safety rule: all flagged results mentioned, correct direction, no diagnosis, no medication advice, referral to a doctor, plain text, sensible length.
+
+| Model | Passes every rule | States or implies a diagnosis |
+|---|---|---|
+| Qwen3-4B, untuned | 77.9% | 16.8% |
+| Qwen3-4B + QLoRA (20 minutes on an RTX 5070) | 94.0% | 2.0% |
+| Same model as Q8_0 GGUF, served by Ollama | 94.6% | 2.0% |
+
+These numbers measure rule compliance on synthetic data, not medical accuracy. Details and caveats: [`docs/results/lab-explainer.md`](docs/results/lab-explainer.md).
+
+**Pipeline benchmark.** Before the product model, the same training and export path was proven on PubMedQA (official test split, 500 questions):
 
 | Model | Accuracy | Macro F1 |
 |---|---|---|
@@ -45,8 +55,6 @@ The pipeline was first proven end to end on a public benchmark, PubMedQA (offici
 | Same model as Q8_0 GGUF, served by Ollama | 0.766 | 0.551 |
 
 Macro F1 moves much less than accuracy because the fine-tuned model still fails on the rare "maybe" class. That, the experiment that led to it, and a first run that scored 0.12 because of a chat-template mismatch are written up in [`docs/results/finetuned-text.md`](docs/results/finetuned-text.md).
-
-Results for the lab explainer itself will be added here once it is trained and measured.
 
 ## Repository
 
