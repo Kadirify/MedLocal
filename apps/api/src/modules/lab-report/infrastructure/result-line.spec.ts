@@ -42,10 +42,23 @@ describe('parseResultLine', () => {
     expect(parseResultLine('TSH 2.10 0.30 - 4.20')).toMatchObject({ label: 'TSH', value: 2.1 });
   });
 
-  it.each(['Patient: Jane Doe', 'Test Result Unit Reference', '', 'Collected 2026-09-19 08:30'])(
-    'ignores "%s"',
-    (line) => {
-      expect(parseResultLine(line)).toBeNull();
-    },
-  );
+  it('reads a range printed without spaces and keeps the unit apart from it', () => {
+    const row = parseResultLine('TSH 2,10 0,30-4,20');
+
+    expect(row).toMatchObject({ label: 'TSH', value: 2.1, unit: null });
+    expect(row?.printedRange).toMatchObject({ low: 0.3, high: 4.2 });
+  });
+
+  it('reads a row without a range', () => {
+    expect(parseResultLine('Alkalen fosfataz (ALP) (Serum/Plazma) 138,4 U/L')).toMatchObject({
+      label: 'Alkalen fosfataz (ALP) (Serum/Plazma)',
+      value: 138.4,
+      unit: 'U/L',
+      printedRange: null,
+    });
+  });
+
+  it.each(['Patient: Jane Doe', 'Test Result Unit Reference', ''])('ignores "%s"', (line) => {
+    expect(parseResultLine(line)).toBeNull();
+  });
 });

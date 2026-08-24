@@ -51,7 +51,7 @@ export class LabReportController {
     @Body() patient: PatientDto,
   ): Promise<LabReportView> {
     try {
-      const { report, unrecognizedLabels } = await this.readLabReport.execute(
+      const { report, unrecognizedLabels, differentUnitLabels } = await this.readLabReport.execute(
         file.buffer,
         patient.sex,
         patient.age,
@@ -61,6 +61,7 @@ export class LabReportController {
         age: report.age,
         results: toResultViews(report),
         unrecognizedLabels,
+        differentUnitLabels,
         criticalMessage: report.criticalResults.length > 0 ? CRITICAL_VALUE_MESSAGE : null,
         disclaimer: DISCLAIMER,
       };

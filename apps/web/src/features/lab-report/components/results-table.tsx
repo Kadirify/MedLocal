@@ -28,7 +28,10 @@ export function ResultsTable({ results }: { results: LabResult[] }) {
                 {result.value.toFixed(result.decimals)}
               </td>
               <td className="py-2 pr-4 text-muted">{result.unit}</td>
-              <td className="py-2 pr-4 tabular-nums text-muted">{describe(result)}</td>
+              <td className="py-2 pr-4 tabular-nums text-muted">
+                {describe(result)}
+                {result.referenceSource === "catalog" && <sup className="ml-0.5 text-high">*</sup>}
+              </td>
               <td className="py-2">
                 <Badge result={result} />
               </td>
@@ -36,6 +39,13 @@ export function ResultsTable({ results }: { results: LabResult[] }) {
           ))}
         </tbody>
       </table>
+      {results.some((result) => result.referenceSource === "catalog") && (
+        <p className="mt-3 text-xs text-muted">
+          <span className="text-high">*</span> Raporunuzda bu tahlil için aralık basılmamış. Genel
+          yetişkin aralığı kullanıldı; laboratuvarınızın aralığı yaşa veya yönteme göre farklı
+          olabilir.
+        </p>
+      )}
     </div>
   );
 }

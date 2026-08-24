@@ -60,6 +60,7 @@ export interface ResultView {
   readonly low: number | null;
   readonly high: number | null;
   readonly reference: string;
+  readonly referenceSource: string;
   readonly flag: string;
   readonly critical: boolean;
 }
@@ -69,6 +70,7 @@ export interface LabReportView {
   readonly age: number;
   readonly results: readonly ResultView[];
   readonly unrecognizedLabels: readonly string[];
+  readonly differentUnitLabels: readonly string[];
   readonly criticalMessage: string | null;
   readonly disclaimer: string;
 }
@@ -79,11 +81,12 @@ export function toResultView(result: LabResult): ResultView {
     analyte: analyte.key,
     name: analyte.name,
     value: result.value,
-    unit: analyte.unit,
+    unit: result.printedUnit ?? analyte.unit,
     decimals: analyte.decimals,
     low: reference.low,
     high: reference.high,
     reference: reference.describe(analyte.decimals),
+    referenceSource: result.referenceSource,
     flag: result.flag,
     critical: result.isCritical,
   };

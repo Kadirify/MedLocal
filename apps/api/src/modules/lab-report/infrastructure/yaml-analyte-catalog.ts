@@ -58,12 +58,26 @@ export class YamlAnalyteCatalog extends AnalyteCatalog {
   }
 
   findByLabel(label: string): Analyte | undefined {
-    return this.byLabel.get(normalize(label));
+    for (const candidate of labelCandidates(label)) {
+      const analyte = this.byLabel.get(normalize(candidate));
+      if (analyte) return analyte;
+    }
+    return undefined;
   }
 }
 
 function toRange(input: RangeInput): ReferenceRange | undefined {
   return input ? new ReferenceRange(input.low, input.high) : undefined;
+}
+
+/**
+ * Laboratories decorate the name: "HGB (Hemoglobin)", "Kreatinin (Serum/Plazma)", "AST ( SGOT)".
+ * The whole label is tried first, then the part outside the brackets, then each bracketed part.
+ */
+function labelCandidates(label: string): string[] {
+  const bracketed = [...label.matchAll(/\(([^()]*)\)/g)].map((match) => match[1] ?? '');
+  const outside = label.replace(/\([^()]*\)/g, ' ');
+  return [label, outside, ...bracketed];
 }
 
 function normalize(label: string): string {

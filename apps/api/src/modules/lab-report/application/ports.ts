@@ -9,6 +9,7 @@ export abstract class AnalyteCatalog {
 export interface ParsedRow {
   readonly label: string;
   readonly value: number;
+  readonly unit: string | null;
   readonly printedRange: ReferenceRange | null;
 }
 

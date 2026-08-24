@@ -35,6 +35,12 @@ export function LabReportScreen() {
           ) : (
             <p className="text-sm text-muted">Bu raporda tanınan bir tahlil bulunamadı.</p>
           )}
+          {report.differentUnitLabels.length > 0 && (
+            <p className="mt-4 text-xs text-muted">
+              Farklı bir birimle basıldığı için değerlendirilmeyen satırlar:{" "}
+              {report.differentUnitLabels.join(", ")}
+            </p>
+          )}
           {report.unrecognizedLabels.length > 0 && (
             <p className="mt-4 text-xs text-muted">
               Tanınmayan ve açıklamaya dahil edilmeyen satırlar:{" "}

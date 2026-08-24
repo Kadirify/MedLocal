@@ -58,6 +58,70 @@ describe('reading a lab report PDF', () => {
     expect(report.criticalResults.map((r) => r.analyte.key)).toEqual(['potassium']);
   });
 
+  it('matches labels the way Turkish hospital laboratories print them', async () => {
+    const pdf = await renderLabReportPdf([
+      ['HGB (Hemoglobin)', '16,1', 'g/dL', '12,9-16,7'],
+      ['Kreatinin (Serum/Plazma)', '1,04', 'mg/dL', '0,6-1,2'],
+      ['AST ( SGOT)', '23', 'U/L', '11-34'],
+      ['RBC (Eritrosit Sayisi)', '5,90 H', '10^6/uL', '4,3-5,7'],
+      ['MCH (Ortalama Eritrosit Hemoglobini)', '27,3', 'pg', '26,6-33'],
+    ]);
+
+    const { report, unrecognizedLabels } = await readLabReport.execute(pdf, 'male', 30);
+
+    expect(report.results.map((r) => [r.analyte.key, r.value, r.flag])).toEqual([
+      ['hemoglobin', 16.1, 'NORMAL'],
+      ['creatinine', 1.04, 'NORMAL'],
+      ['ast', 23, 'NORMAL'],
+      ['red_blood_cells', 5.9, 'HIGH'],
+    ]);
+    expect(unrecognizedLabels).toEqual(['MCH (Ortalama Eritrosit Hemoglobini)']);
+  });
+
+  it('falls back to the catalog when a row prints no range', async () => {
+    const pdf = await renderLabReportPdf([
+      ['Alkalen fosfataz (ALP) (Serum/Plazma)', '138,4', 'U/L', ''],
+    ]);
+
+    const { report } = await readLabReport.execute(pdf, 'male', 30);
+
+    expect(report.results.map((r) => [r.analyte.key, r.flag, r.referenceSource])).toEqual([
+      ['alp', 'HIGH', 'catalog'],
+    ]);
+  });
+
+  it('keeps the unit printed on the report', async () => {
+    const pdf = await renderLabReportPdf([['WBC', '7,51', '10^3/uL', '3,8-9,99']]);
+
+    const { report } = await readLabReport.execute(pdf, 'male', 30);
+
+    expect(report.results[0]?.printedUnit).toBe('10^3/uL');
+  });
+
+  it('sets aside a result printed in a different unit instead of misjudging it', async () => {
+    const pdf = await renderLabReportPdf([
+      ['Hemoglobin', '161', 'g/L', '129-167'],
+      ['Sodyum', '139', 'mmol/L', '135-145'],
+    ]);
+
+    const { report, differentUnitLabels } = await readLabReport.execute(pdf, 'male', 30);
+
+    expect(report.results.map((r) => r.analyte.key)).toEqual(['sodium']);
+    expect(differentUnitLabels).toEqual(['Hemoglobin']);
+  });
+
+  it('ignores page furniture that happens to contain numbers', async () => {
+    const pdf = await renderLabReportPdf([
+      ['Sayfa', '1/3', '', ''],
+      ['Sodyum', '139', 'mmol/L', '135-145'],
+    ]);
+
+    const { report, unrecognizedLabels } = await readLabReport.execute(pdf, 'male', 30);
+
+    expect(report.results).toHaveLength(1);
+    expect(unrecognizedLabels).toEqual([]);
+  });
+
   it('rejects a file that is not a PDF', async () => {
     const notPdf = new TextEncoder().encode('hello');
 

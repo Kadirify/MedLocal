@@ -10,6 +10,7 @@ export interface LabResult {
   low: number | null;
   high: number | null;
   reference: string;
+  referenceSource: "report" | "catalog";
   flag: Flag;
   critical: boolean;
 }
@@ -19,6 +20,7 @@ export interface LabReport {
   age: number;
   results: LabResult[];
   unrecognizedLabels: string[];
+  differentUnitLabels: string[];
   criticalMessage: string | null;
   disclaimer: string;
 }

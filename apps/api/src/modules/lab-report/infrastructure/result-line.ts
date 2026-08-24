@@ -3,10 +3,13 @@ import { ReferenceRange } from '../domain/reference-range.js';
 
 const NUMBER = String.raw`\d+(?:[.,]\d+)?`;
 
-// "<label> <value> [H|L|*] [unit] <low - high | < high | > low>"
+const RANGE = String.raw`(?:(?<low>${NUMBER})\s*[-–]\s*(?<high>${NUMBER})|(?<sign>[<>≤≥])=?\s*(?<bound>${NUMBER}))`;
+
+// "<label> <value> [H|L|*] [unit] [low - high | < high | > low]"
+// A unit may start with a digit ("10^3/µL") but must not swallow a range printed without spaces.
 const RESULT_LINE = new RegExp(
-  String.raw`^(?<label>.+?)\s+(?<value>${NUMBER})(?:\s+[HL*])?(?:\s+(?<unit>\S+))?\s+` +
-    String.raw`(?:(?<low>${NUMBER})\s*[-–]\s*(?<high>${NUMBER})|(?<sign>[<>≤≥])=?\s*(?<bound>${NUMBER}))\s*$`,
+  String.raw`^(?<label>.+?)\s+(?<value>${NUMBER})(?:\s+[HL*])?` +
+    String.raw`(?:\s+(?<unit>(?!${NUMBER}\s*[-–])\S+))?(?:\s+${RANGE})?\s*$`,
   'u',
 );
 
@@ -17,6 +20,7 @@ export function parseResultLine(line: string): ParsedRow | null {
   return {
     label: groups.label,
     value: toNumber(groups.value),
+    unit: groups.unit ?? null,
     printedRange: toRange(groups),
   };
 }
