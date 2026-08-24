@@ -1,7 +1,7 @@
 import type { ExplanationFooter, LabReport, Sex } from "./types";
 
-// "localhost" costs two seconds per request on Windows while IPv6 is tried first
-const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://127.0.0.1:3001";
+// same origin: next.config.ts proxies /api to the API server
+const API_URL = "/api";
 
 export class ApiError extends Error {}
 
