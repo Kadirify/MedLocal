@@ -10,7 +10,7 @@ CATALOG_FILE = Path(__file__).parents[3] / "reference" / "analytes.yaml"
 def test_the_shipped_catalog_is_valid() -> None:
     catalog = AnalyteCatalog.read(CATALOG_FILE)
 
-    assert len(catalog.analytes) >= 25
+    assert len(catalog.analytes) >= 55
     assert all(catalog.panels.values())
 
 
@@ -36,9 +36,14 @@ def test_a_bound_without_context_is_rejected() -> None:
     with pytest.raises(ValueError, match="needs low_context"):
         Analyte(
             name="X",
+            name_tr="X",
             unit="u",
             decimals=0,
             measures="x",
+            measures_tr="x",
+            mentions=("x",),
+            mentions_tr=("x",),
             ranges={"any": ReferenceRange(low=1, high=2)},
             high_context="h",
+            high_context_tr="h",
         )

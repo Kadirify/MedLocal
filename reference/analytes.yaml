@@ -5,342 +5,1018 @@
 #
 # Reference intervals follow the ranges published by Mayo Clinic Laboratories and the
 # MedlinePlus test pages. Critical limits follow commonly published hospital call lists.
-# `aliases` are the labels a printed report may use for the analyte, matched exactly after
-# lower-casing. `mentions` are the words an explanation may use for it.
-# `low_context` and `high_context` list general, non-diagnostic associations used to ground
-# generated explanations.
+#
+# `aliases`   labels a printed report may use, matched exactly after lower-casing.
+# `mentions`  words an English explanation may use for the analyte; `mentions_tr` the Turkish ones.
+#             Entries written in capitals are acronyms and are matched case-sensitively, so that
+#             "ALT" is never found in the Turkish word "altında".
+# `*_context` general, non-diagnostic associations used to ground generated explanations.
 
 panels:
-  complete_blood_count: [hemoglobin, hematocrit, red_blood_cells, mcv, white_blood_cells, platelets]
+  complete_blood_count:
+    - white_blood_cells
+    - neutrophils_pct
+    - lymphocytes_pct
+    - monocytes_pct
+    - eosinophils_pct
+    - basophils_pct
+    - neutrophils_abs
+    - lymphocytes_abs
+    - monocytes_abs
+    - eosinophils_abs
+    - basophils_abs
+    - red_blood_cells
+    - hemoglobin
+    - hematocrit
+    - mcv
+    - mch
+    - mchc
+    - rdw_cv
+    - platelets
+    - mpv
+    - pdw
+  short_blood_count: [white_blood_cells, red_blood_cells, hemoglobin, hematocrit, mcv, platelets]
+  kidney: [urea, creatinine, uric_acid]
   basic_metabolic: [glucose_fasting, urea_nitrogen, creatinine, sodium, potassium, calcium]
-  liver: [alt, ast, alp, total_bilirubin, albumin]
+  electrolytes: [sodium, potassium, chloride, calcium, magnesium, phosphorus]
+  liver: [alt, ast, alp, ggt, total_bilirubin, direct_bilirubin, albumin, total_protein]
+  liver_short: [alt, ast, ggt]
   lipid: [total_cholesterol, ldl_cholesterol, hdl_cholesterol, triglycerides]
-  thyroid: [tsh, free_t4]
-  vitamins_and_iron: [ferritin, vitamin_b12, vitamin_d]
+  thyroid: [tsh, free_t4, free_t3]
+  thyroid_short: [tsh]
+  anemia: [ferritin, iron, tibc, vitamin_b12, folate]
+  vitamins: [vitamin_b12, vitamin_d, folate]
   diabetes: [glucose_fasting, hba1c]
-  inflammation: [crp, white_blood_cells]
+  inflammation: [crp, esr]
+  muscle: [ck, ldh]
 
 analytes:
+  white_blood_cells:
+    name: White blood cells
+    name_tr: Lökosit (WBC)
+    aliases: [wbc, lökosit, lokosit, lökosit sayısı, beyaz küre]
+    mentions: [white blood cell, WBC]
+    mentions_tr: [lökosit, WBC, akyuvar, beyaz kan hücre]
+    unit: 10^3/µL
+    decimals: 2
+    measures: the number of white blood cells, which help fight infection
+    measures_tr: enfeksiyonla savaşan beyaz kan hücrelerinin sayısını
+    ranges:
+      any: {low: 3.4, high: 9.6}
+    critical: {low: 2.0, high: 30.0}
+    low_context: can be seen after viral infections or with some medicines
+    low_context_tr: viral enfeksiyonlardan sonra veya bazı ilaçlarla görülebilir
+    high_context: can be seen with infection, inflammation, physical stress, or smoking
+    high_context_tr: enfeksiyon, iltihap, bedensel stres veya sigara kullanımıyla görülebilir
+
+  neutrophils_pct:
+    name: Neutrophils (%)
+    name_tr: Nötrofil oranı (NEUT%)
+    aliases: [neut%, nötrofil oranı, nötrofil %, neu%]
+    mentions: [neutrophil]
+    mentions_tr: [nötrofil]
+    unit: "%"
+    decimals: 1
+    measures: the share of white blood cells that are neutrophils, the cells that respond first to bacterial infection
+    measures_tr: beyaz kan hücreleri içinde, bakteriyel enfeksiyona ilk yanıt veren nötrofillerin payını
+    ranges:
+      any: {low: 40, high: 74}
+    low_context: can be seen after viral infections or with some medicines, and is read together with the absolute count
+    low_context_tr: viral enfeksiyonlardan sonra veya bazı ilaçlarla görülebilir; mutlak sayıyla birlikte değerlendirilir
+    high_context: can be seen with bacterial infection, inflammation, physical stress, or steroid medicines
+    high_context_tr: bakteriyel enfeksiyon, iltihap, bedensel stres veya kortizon türü ilaçlarla görülebilir
+
+  lymphocytes_pct:
+    name: Lymphocytes (%)
+    name_tr: Lenfosit oranı (LYMPH%)
+    aliases: [lymph%, lenfosit oranı, lenfosit %, lym%]
+    mentions: [lymphocyte]
+    mentions_tr: [lenfosit]
+    unit: "%"
+    decimals: 1
+    measures: the share of white blood cells that are lymphocytes, which handle viruses and immune memory
+    measures_tr: beyaz kan hücreleri içinde, virüslerle ve bağışıklık hafızasıyla ilgilenen lenfositlerin payını
+    ranges:
+      any: {low: 20, high: 45}
+    low_context: often just reflects a higher share of neutrophils, and can be seen with stress or steroid medicines
+    low_context_tr: çoğu zaman yalnızca nötrofil payının artmasını yansıtır; stres veya kortizon türü ilaçlarla da görülebilir
+    high_context: can be seen during and after viral infections
+    high_context_tr: viral enfeksiyonlar sırasında ve sonrasında görülebilir
+
+  monocytes_pct:
+    name: Monocytes (%)
+    name_tr: Monosit oranı (MONO%)
+    aliases: [mono%, monosit oranı, monosit %, mon%]
+    mentions: [monocyte]
+    mentions_tr: [monosit]
+    unit: "%"
+    decimals: 1
+    measures: the share of white blood cells that are monocytes, which clean up damaged tissue and germs
+    measures_tr: beyaz kan hücreleri içinde, hasarlı dokuyu ve mikropları temizleyen monositlerin payını
+    ranges:
+      any: {low: 2, high: 10}
+    low_context: a mildly low share on its own is usually not significant
+    low_context_tr: tek başına hafif düşük bir oran genellikle anlamlı değildir
+    high_context: can be seen while recovering from an infection or with long-lasting inflammation
+    high_context_tr: bir enfeksiyondan iyileşme döneminde veya uzun süren iltihapta görülebilir
+
+  eosinophils_pct:
+    name: Eosinophils (%)
+    name_tr: Eozinofil oranı (EO%)
+    aliases: [eo%, eos%, eozinofil oranı, eozinofil %]
+    mentions: [eosinophil]
+    mentions_tr: [eozinofil]
+    unit: "%"
+    decimals: 1
+    measures: the share of white blood cells that are eosinophils, which take part in allergic reactions
+    measures_tr: beyaz kan hücreleri içinde, alerjik tepkilerde rol alan eozinofillerin payını
+    ranges:
+      any: {low: null, high: 6}
+    high_context: can be seen with allergies, asthma, eczema, or some parasitic infections
+    high_context_tr: alerji, astım, egzama veya bazı parazit enfeksiyonlarıyla görülebilir
+
+  basophils_pct:
+    name: Basophils (%)
+    name_tr: Bazofil oranı (BASO%)
+    aliases: [baso%, bazofil oranı, bazofil %]
+    mentions: [basophil]
+    mentions_tr: [bazofil]
+    unit: "%"
+    decimals: 1
+    measures: the share of white blood cells that are basophils, a rare cell type involved in allergic reactions
+    measures_tr: beyaz kan hücreleri içinde, alerjik tepkilerde rol alan ve az sayıda bulunan bazofillerin payını
+    ranges:
+      any: {low: null, high: 1.5}
+    high_context: a mildly high share can be seen with allergies and is often not significant on its own
+    high_context_tr: hafif yüksek bir oran alerjilerle görülebilir ve tek başına çoğu zaman anlamlı değildir
+
+  neutrophils_abs:
+    name: Neutrophil count
+    name_tr: Nötrofil sayısı (NEUT#)
+    aliases: [neut#, nötrofil sayısı, neu#]
+    mentions: [neutrophil]
+    mentions_tr: [nötrofil]
+    unit: 10^3/µL
+    decimals: 2
+    measures: the number of neutrophils, the white blood cells that respond first to bacterial infection
+    measures_tr: bakteriyel enfeksiyona ilk yanıt veren beyaz kan hücreleri olan nötrofillerin sayısını
+    ranges:
+      any: {low: 1.8, high: 7.2}
+    critical: {low: 0.5, high: null}
+    low_context: can be seen after viral infections or with some medicines
+    low_context_tr: viral enfeksiyonlardan sonra veya bazı ilaçlarla görülebilir
+    high_context: can be seen with bacterial infection, inflammation, physical stress, smoking, or steroid medicines
+    high_context_tr: bakteriyel enfeksiyon, iltihap, bedensel stres, sigara veya kortizon türü ilaçlarla görülebilir
+
+  lymphocytes_abs:
+    name: Lymphocyte count
+    name_tr: Lenfosit sayısı (LYMPH#)
+    aliases: [lymph#, lenfosit sayısı, lym#]
+    mentions: [lymphocyte]
+    mentions_tr: [lenfosit]
+    unit: 10^3/µL
+    decimals: 2
+    measures: the number of lymphocytes, the white blood cells that handle viruses and immune memory
+    measures_tr: virüslerle ve bağışıklık hafızasıyla ilgilenen beyaz kan hücreleri olan lenfositlerin sayısını
+    ranges:
+      any: {low: 1.0, high: 3.4}
+    low_context: can be seen with stress, steroid medicines, or after some infections
+    low_context_tr: stres, kortizon türü ilaçlar veya bazı enfeksiyonlardan sonra görülebilir
+    high_context: can be seen during and after viral infections
+    high_context_tr: viral enfeksiyonlar sırasında ve sonrasında görülebilir
+
+  monocytes_abs:
+    name: Monocyte count
+    name_tr: Monosit sayısı (MONO#)
+    aliases: [mono#, monosit sayısı, mon#]
+    mentions: [monocyte]
+    mentions_tr: [monosit]
+    unit: 10^3/µL
+    decimals: 2
+    measures: the number of monocytes, the white blood cells that clean up damaged tissue and germs
+    measures_tr: hasarlı dokuyu ve mikropları temizleyen beyaz kan hücreleri olan monositlerin sayısını
+    ranges:
+      any: {low: 0.1, high: 0.9}
+    low_context: a mildly low count on its own is usually not significant
+    low_context_tr: tek başına hafif düşük bir sayı genellikle anlamlı değildir
+    high_context: can be seen while recovering from an infection or with long-lasting inflammation
+    high_context_tr: bir enfeksiyondan iyileşme döneminde veya uzun süren iltihapta görülebilir
+
+  eosinophils_abs:
+    name: Eosinophil count
+    name_tr: Eozinofil sayısı (EO#)
+    aliases: [eo#, eos#, eozinofil sayısı]
+    mentions: [eosinophil]
+    mentions_tr: [eozinofil]
+    unit: 10^3/µL
+    decimals: 2
+    measures: the number of eosinophils, the white blood cells that take part in allergic reactions
+    measures_tr: alerjik tepkilerde rol alan beyaz kan hücreleri olan eozinofillerin sayısını
+    ranges:
+      any: {low: null, high: 0.5}
+    high_context: can be seen with allergies, asthma, eczema, or some parasitic infections
+    high_context_tr: alerji, astım, egzama veya bazı parazit enfeksiyonlarıyla görülebilir
+
+  basophils_abs:
+    name: Basophil count
+    name_tr: Bazofil sayısı (BASO#)
+    aliases: [baso#, bazofil sayısı]
+    mentions: [basophil]
+    mentions_tr: [bazofil]
+    unit: 10^3/µL
+    decimals: 2
+    measures: the number of basophils, a rare white blood cell involved in allergic reactions
+    measures_tr: alerjik tepkilerde rol alan ve az sayıda bulunan bazofillerin sayısını
+    ranges:
+      any: {low: null, high: 0.2}
+    high_context: a mildly high count can be seen with allergies and is often not significant on its own
+    high_context_tr: hafif yüksek bir sayı alerjilerle görülebilir ve tek başına çoğu zaman anlamlı değildir
+
+  red_blood_cells:
+    name: Red blood cells
+    name_tr: Eritrosit (RBC)
+    aliases: [rbc, eritrosit, eritrosit sayısı, alyuvar]
+    mentions: [red blood cell, RBC]
+    mentions_tr: [eritrosit, RBC, alyuvar, kırmızı kan hücre]
+    unit: 10^6/µL
+    decimals: 2
+    measures: the number of red blood cells
+    measures_tr: kandaki alyuvar sayısını
+    ranges:
+      male: {low: 4.35, high: 5.65}
+      female: {low: 3.92, high: 5.13}
+    low_context: can be seen with anemia, blood loss, or low iron or vitamin levels
+    low_context_tr: kansızlık, kan kaybı veya düşük demir ya da vitamin düzeyleriyle görülebilir
+    high_context: can be seen with dehydration or smoking
+    high_context_tr: sıvı kaybı veya sigara kullanımıyla görülebilir
+
   hemoglobin:
     name: Hemoglobin
+    name_tr: Hemoglobin (HGB)
     aliases: [hgb, hb]
+    mentions: [hemoglobin]
+    mentions_tr: [hemoglobin]
     unit: g/dL
     decimals: 1
     measures: the protein in red blood cells that carries oxygen around the body
+    measures_tr: alyuvarların içinde bulunan ve vücuda oksijen taşıyan proteini
     ranges:
       male: {low: 13.2, high: 16.6}
       female: {low: 11.6, high: 15.0}
     critical: {low: 7.0, high: 20.0}
     low_context: can be seen with low iron, vitamin B12 or folate, blood loss, or long-term health conditions
+    low_context_tr: demir, B12 vitamini veya folat eksikliğinde, kan kaybında ya da uzun süreli sağlık sorunlarında görülebilir
     high_context: can be seen with dehydration, smoking, or living at high altitude
+    high_context_tr: sıvı kaybı, sigara kullanımı veya yüksek rakımda yaşamayla görülebilir
 
   hematocrit:
     name: Hematocrit
+    name_tr: Hematokrit (HCT)
     aliases: [hct, hematokrit]
+    mentions: [hematocrit]
+    mentions_tr: [hematokrit]
     unit: "%"
     decimals: 1
     measures: the share of blood volume made up of red blood cells
+    measures_tr: kan hacminin ne kadarının alyuvarlardan oluştuğunu
     ranges:
       male: {low: 38.3, high: 48.6}
       female: {low: 35.5, high: 44.9}
     critical: {low: 20.0, high: 60.0}
     low_context: usually moves together with hemoglobin and can be seen with anemia or recent blood loss
+    low_context_tr: genellikle hemoglobinle birlikte hareket eder; kansızlıkta veya yakın zamanda kan kaybında görülebilir
     high_context: can be seen with dehydration or smoking
-
-  red_blood_cells:
-    name: Red blood cells
-    aliases: [rbc, eritrosit]
-    mentions: [red blood cell]
-    unit: million/µL
-    decimals: 2
-    measures: the number of red blood cells
-    ranges:
-      male: {low: 4.35, high: 5.65}
-      female: {low: 3.92, high: 5.13}
-    low_context: can be seen with anemia, blood loss, or low iron or vitamin levels
-    high_context: can be seen with dehydration or smoking
+    high_context_tr: sıvı kaybı veya sigara kullanımıyla görülebilir
 
   mcv:
     name: MCV
-    mentions: [mcv, size of red blood cells, size of your red blood cells]
+    name_tr: MCV (ortalama eritrosit hacmi)
+    aliases: [ortalama eritrosit hacmi]
+    mentions: [MCV, size of red blood cells, size of your red blood cells]
+    mentions_tr: [MCV, ortalama eritrosit hacmi, alyuvarların boyut, alyuvarlarınızın boyut]
     unit: fL
-    decimals: 0
+    decimals: 1
     measures: the average size of red blood cells
+    measures_tr: alyuvarların ortalama büyüklüğünü
     ranges:
       any: {low: 80, high: 100}
     low_context: smaller red blood cells can be seen with low iron
+    low_context_tr: küçük alyuvarlar demir eksikliğinde görülebilir
     high_context: larger red blood cells can be seen with low vitamin B12 or folate, or with regular alcohol use
+    high_context_tr: büyük alyuvarlar B12 vitamini veya folat eksikliğinde ya da düzenli alkol kullanımında görülebilir
 
-  white_blood_cells:
-    name: White blood cells
-    aliases: [wbc, lökosit, lokosit]
-    mentions: [white blood cell]
-    unit: thousand/µL
+  mch:
+    name: MCH
+    name_tr: MCH (ortalama eritrosit hemoglobini)
+    aliases: [ortalama eritrosit hemoglobini]
+    mentions: [MCH]
+    mentions_tr: [MCH]
+    unit: pg
     decimals: 1
-    measures: the number of white blood cells, which help fight infection
+    measures: the average amount of hemoglobin inside one red blood cell
+    measures_tr: tek bir alyuvarın içindeki ortalama hemoglobin miktarını
     ranges:
-      any: {low: 3.4, high: 9.6}
-    critical: {low: 2.0, high: 30.0}
-    low_context: can be seen after viral infections or with some medicines
-    high_context: can be seen with infection, inflammation, physical stress, or smoking
+      any: {low: 27, high: 33}
+    low_context: usually goes with smaller red blood cells and can be seen with low iron
+    low_context_tr: genellikle küçük alyuvarlarla birlikte görülür ve demir eksikliğinde görülebilir
+    high_context: usually goes with larger red blood cells and can be seen with low vitamin B12 or folate
+    high_context_tr: genellikle büyük alyuvarlarla birlikte görülür; B12 vitamini veya folat eksikliğinde görülebilir
+
+  mchc:
+    name: MCHC
+    name_tr: MCHC (ortalama hemoglobin konsantrasyonu)
+    aliases: [ortalama hb konsantrasyonu, ortalama eritrosit hemoglobin konsantrasyonu]
+    mentions: [MCHC]
+    mentions_tr: [MCHC]
+    unit: g/dL
+    decimals: 1
+    measures: how concentrated hemoglobin is inside red blood cells
+    measures_tr: alyuvarların içindeki hemoglobinin ne kadar yoğun olduğunu
+    ranges:
+      any: {low: 32, high: 36}
+    low_context: can be seen with low iron
+    low_context_tr: demir eksikliğinde görülebilir
+    high_context: a mildly high value is often caused by the sample or the measurement and is usually not significant on its own
+    high_context_tr: hafif yüksek bir değer çoğu zaman örnekten veya ölçümden kaynaklanır ve tek başına genellikle anlamlı değildir
+
+  rdw_cv:
+    name: RDW
+    name_tr: RDW (eritrosit dağılım genişliği)
+    aliases: [rdw-cv, rdw cv, eritrosit dağılım aralığı, eritrosit dağılım genişliği]
+    mentions: [RDW]
+    mentions_tr: [RDW]
+    unit: "%"
+    decimals: 1
+    measures: how much red blood cells differ from each other in size
+    measures_tr: alyuvarların büyüklüklerinin birbirinden ne kadar farklı olduğunu
+    ranges:
+      any: {low: 11.5, high: 14.5}
+    low_context: a low value is not considered significant
+    low_context_tr: düşük bir değer anlamlı kabul edilmez
+    high_context: can be seen when red blood cells of different sizes are present, for example with low iron, vitamin B12 or folate
+    high_context_tr: farklı boyutlarda alyuvarlar bulunduğunda, örneğin demir, B12 vitamini veya folat eksikliğinde görülebilir
 
   platelets:
     name: Platelets
-    aliases: [plt, trombosit]
+    name_tr: Trombosit (PLT)
+    aliases: [plt, trombosit, trombosit sayısı]
     mentions: [platelet]
-    unit: thousand/µL
+    mentions_tr: [trombosit, PLT, kan pulcuk]
+    unit: 10^3/µL
     decimals: 0
     measures: the number of platelets, which help blood to clot
+    measures_tr: kanın pıhtılaşmasına yardım eden trombositlerin sayısını
     ranges:
       any: {low: 150, high: 400}
     critical: {low: 20, high: 1000}
     low_context: can be seen after viral infections or with some medicines
+    low_context_tr: viral enfeksiyonlardan sonra veya bazı ilaçlarla görülebilir
     high_context: can be seen with inflammation, infection, or low iron
+    high_context_tr: iltihap, enfeksiyon veya demir eksikliğiyle görülebilir
+
+  mpv:
+    name: MPV
+    name_tr: MPV (ortalama trombosit hacmi)
+    aliases: [ortalama trombosit hacmi]
+    mentions: [MPV]
+    mentions_tr: [MPV]
+    unit: fL
+    decimals: 1
+    measures: the average size of platelets
+    measures_tr: trombositlerin ortalama büyüklüğünü
+    ranges:
+      any: {low: 7, high: 12}
+    low_context: with a normal platelet count, a mildly low value is usually not significant
+    low_context_tr: trombosit sayısı normalken hafif düşük bir değer genellikle anlamlı değildir
+    high_context: larger platelets are younger ones; with a normal platelet count this is usually not significant
+    high_context_tr: büyük trombositler genç trombositlerdir; trombosit sayısı normalken bu genellikle anlamlı değildir
+
+  pdw:
+    name: PDW
+    name_tr: PDW (trombosit dağılım genişliği)
+    aliases: [trombosit dağılım aralığı, trombosit dağılım genişliği]
+    mentions: [PDW]
+    mentions_tr: [PDW]
+    unit: fL
+    decimals: 1
+    measures: how much platelets differ from each other in size
+    measures_tr: trombositlerin büyüklüklerinin birbirinden ne kadar farklı olduğunu
+    ranges:
+      any: {low: 9, high: 17}
+    low_context: with a normal platelet count, a low value on its own is usually not significant
+    low_context_tr: trombosit sayısı normalken tek başına düşük bir değer genellikle anlamlı değildir
+    high_context: with a normal platelet count, a high value on its own is usually not significant
+    high_context_tr: trombosit sayısı normalken tek başına yüksek bir değer genellikle anlamlı değildir
 
   glucose_fasting:
     name: Fasting glucose
-    aliases: [glucose, glukoz, glukoz (açlık), açlık kan şekeri]
+    name_tr: Açlık glukozu
+    aliases: [glucose, glukoz, glukoz (açlık), açlık kan şekeri, açlık glukozu]
     mentions: [glucose]
+    mentions_tr: [glukoz, açlık şeker]
     unit: mg/dL
     decimals: 0
     measures: the amount of sugar in the blood after not eating for at least eight hours
+    measures_tr: en az sekiz saat açlıktan sonra kandaki şeker miktarını
     ranges:
       any: {low: 70, high: 99}
     critical: {low: 50, high: 450}
     low_context: can be seen after a long time without food or with some diabetes medicines
+    low_context_tr: uzun süre aç kalındığında veya bazı diyabet ilaçlarıyla görülebilir
     high_context: can be seen if the sample was not truly fasting, with stress or illness, or with prediabetes or diabetes
+    high_context_tr: örnek gerçekten aç karnına alınmadıysa, stres veya hastalık sırasında ya da prediyabet veya diyabette görülebilir
 
   hba1c:
     name: HbA1c
-    aliases: [hemoglobin a1c]
+    name_tr: HbA1c
+    aliases: [hemoglobin a1c, glikozile hemoglobin]
+    mentions: [HbA1c, A1c]
+    mentions_tr: [HbA1c, A1c]
     unit: "%"
     decimals: 1
     measures: the average blood sugar level over roughly the past three months
+    measures_tr: yaklaşık son üç aydaki ortalama kan şekeri düzeyini
     ranges:
       any: {low: null, high: 5.6}
     high_context: values from 5.7 to 6.4 are in the range often called prediabetes, and 6.5 or above is in the range used when assessing diabetes
+    high_context_tr: 5,7 ile 6,4 arası değerler genellikle prediyabet denen aralıktadır; 6,5 ve üzeri diyabet değerlendirmesinde kullanılan aralıktadır
 
-  urea_nitrogen:
-    name: Blood urea nitrogen
-    aliases: [bun, kan üre azotu]
-    mentions: [urea, bun]
+  urea:
+    name: Urea
+    name_tr: Üre
+    aliases: [üre, ure]
+    mentions: [urea]
+    mentions_tr: [üre]
     unit: mg/dL
     decimals: 0
     measures: a waste product that the kidneys remove from the blood
+    measures_tr: böbreklerin kandan uzaklaştırdığı bir atık maddeyi
+    ranges:
+      any: {low: 17, high: 43}
+    low_context: can be seen with a low-protein diet or drinking a lot of fluid
+    low_context_tr: düşük proteinli beslenmede veya çok sıvı alındığında görülebilir
+    high_context: can be seen with dehydration, a high-protein diet, or reduced kidney function
+    high_context_tr: sıvı kaybında, yüksek proteinli beslenmede veya böbrek işlevi azaldığında görülebilir
+
+  urea_nitrogen:
+    name: Blood urea nitrogen
+    name_tr: Kan üre azotu (BUN)
+    aliases: [bun, kan üre azotu]
+    mentions: [urea, BUN]
+    mentions_tr: [üre azotu, BUN]
+    unit: mg/dL
+    decimals: 0
+    measures: a waste product that the kidneys remove from the blood
+    measures_tr: böbreklerin kandan uzaklaştırdığı bir atık maddeyi
     ranges:
       any: {low: 7, high: 20}
     low_context: can be seen with a low-protein diet or drinking a lot of fluid
+    low_context_tr: düşük proteinli beslenmede veya çok sıvı alındığında görülebilir
     high_context: can be seen with dehydration, a high-protein diet, or reduced kidney function
+    high_context_tr: sıvı kaybında, yüksek proteinli beslenmede veya böbrek işlevi azaldığında görülebilir
 
   creatinine:
     name: Creatinine
+    name_tr: Kreatinin
     aliases: [kreatinin]
+    mentions: [creatinine]
+    mentions_tr: [kreatinin]
     unit: mg/dL
     decimals: 2
     measures: a waste product from muscles that the kidneys filter out
+    measures_tr: kaslardan gelen ve böbreklerin süzdüğü bir atık maddeyi
     ranges:
       male: {low: 0.74, high: 1.35}
       female: {low: 0.59, high: 1.04}
     low_context: can be seen with low muscle mass
+    low_context_tr: kas kütlesi az olduğunda görülebilir
     high_context: can be seen with dehydration, high muscle mass, intense exercise, or reduced kidney function
+    high_context_tr: sıvı kaybında, kas kütlesi fazla olduğunda, yoğun egzersizden sonra veya böbrek işlevi azaldığında görülebilir
+
+  uric_acid:
+    name: Uric acid
+    name_tr: Ürik asit
+    aliases: [ürik asit, urik asit]
+    mentions: [uric acid]
+    mentions_tr: [ürik asit]
+    unit: mg/dL
+    decimals: 1
+    measures: a waste product formed when the body breaks down substances found in many foods
+    measures_tr: vücudun birçok besinde bulunan maddeleri parçalarken oluşturduğu bir atık maddeyi
+    ranges:
+      male: {low: 3.7, high: 8.0}
+      female: {low: 2.7, high: 7.3}
+    low_context: a low value is usually not significant
+    low_context_tr: düşük bir değer genellikle anlamlı değildir
+    high_context: can be related to red meat, seafood, alcohol, sugary drinks, some water tablets, or reduced kidney function, and is linked to gout
+    high_context_tr: kırmızı et, deniz ürünleri, alkol, şekerli içecekler, bazı idrar söktürücüler veya böbrek işlevinin azalmasıyla ilişkili olabilir; gut hastalığıyla bağlantılıdır
 
   sodium:
     name: Sodium
+    name_tr: Sodyum
     aliases: [sodyum, na]
+    mentions: [sodium]
+    mentions_tr: [sodyum]
     unit: mmol/L
     decimals: 0
     measures: a mineral that helps control fluid balance
+    measures_tr: vücudun sıvı dengesini ayarlamaya yardım eden bir minerali
     ranges:
       any: {low: 135, high: 145}
     critical: {low: 120, high: 160}
     low_context: can be seen with some medicines such as water tablets, or with drinking very large amounts of water
+    low_context_tr: idrar söktürücü gibi bazı ilaçlarla veya çok fazla su içildiğinde görülebilir
     high_context: can be seen with dehydration
+    high_context_tr: sıvı kaybında görülebilir
 
   potassium:
     name: Potassium
+    name_tr: Potasyum
     aliases: [potasyum, k]
+    mentions: [potassium]
+    mentions_tr: [potasyum]
     unit: mmol/L
     decimals: 1
     measures: a mineral that nerves and muscles, including the heart, need to work
+    measures_tr: kalp dahil sinir ve kasların çalışması için gereken bir minerali
     ranges:
       any: {low: 3.6, high: 5.2}
     critical: {low: 2.5, high: 6.5}
     low_context: can be seen with vomiting, diarrhea, or some medicines such as water tablets
+    low_context_tr: kusma, ishal veya idrar söktürücü gibi bazı ilaçlarla görülebilir
     high_context: can be seen when the sample was damaged during collection, with some medicines, or with reduced kidney function
+    high_context_tr: kan örneği alınırken zarar gördüğünde, bazı ilaçlarla veya böbrek işlevi azaldığında görülebilir
+
+  chloride:
+    name: Chloride
+    name_tr: Klorür
+    aliases: [klorür, klor, cl]
+    mentions: [chloride]
+    mentions_tr: [klor]
+    unit: mmol/L
+    decimals: 0
+    measures: a mineral that works with sodium to keep the body's fluids in balance
+    measures_tr: sodyumla birlikte vücut sıvılarının dengesini koruyan bir minerali
+    ranges:
+      any: {low: 98, high: 107}
+    critical: {low: 80, high: 120}
+    low_context: can be seen with vomiting or some water tablets
+    low_context_tr: kusma veya bazı idrar söktürücülerle görülebilir
+    high_context: can be seen with dehydration
+    high_context_tr: sıvı kaybında görülebilir
 
   calcium:
     name: Calcium
+    name_tr: Kalsiyum
     aliases: [kalsiyum, ca]
+    mentions: [calcium]
+    mentions_tr: [kalsiyum]
     unit: mg/dL
     decimals: 1
     measures: a mineral needed for bones, muscles and nerves
+    measures_tr: kemikler, kaslar ve sinirler için gereken bir minerali
     ranges:
       any: {low: 8.8, high: 10.2}
     critical: {low: 6.5, high: 13.0}
     low_context: can be seen with low vitamin D or low albumin
+    low_context_tr: D vitamini veya albümin düşüklüğünde görülebilir
     high_context: can be seen with dehydration, some supplements, or an overactive parathyroid gland
+    high_context_tr: sıvı kaybında, bazı takviyelerle veya paratiroid bezinin fazla çalışmasıyla görülebilir
+
+  magnesium:
+    name: Magnesium
+    name_tr: Magnezyum
+    aliases: [magnezyum, mg]
+    mentions: [magnesium]
+    mentions_tr: [magnezyum]
+    unit: mg/dL
+    decimals: 1
+    measures: a mineral that muscles, nerves and the heart rhythm depend on
+    measures_tr: kasların, sinirlerin ve kalp ritminin bağlı olduğu bir minerali
+    ranges:
+      any: {low: 1.7, high: 2.3}
+    critical: {low: 1.0, high: 4.9}
+    low_context: can be seen with diarrhea, regular alcohol use, some water tablets, or some stomach acid medicines
+    low_context_tr: ishal, düzenli alkol kullanımı, bazı idrar söktürücüler veya bazı mide ilaçlarıyla görülebilir
+    high_context: can be seen with supplements or antacids that contain magnesium, or with reduced kidney function
+    high_context_tr: magnezyum içeren takviyeler veya mide ilaçlarıyla ya da böbrek işlevi azaldığında görülebilir
+
+  phosphorus:
+    name: Phosphorus
+    name_tr: Fosfor
+    aliases: [fosfor, inorganik fosfor, p]
+    mentions: [phosphorus, phosphate]
+    mentions_tr: [fosfor, fosfat]
+    unit: mg/dL
+    decimals: 1
+    measures: a mineral that works with calcium to build bones
+    measures_tr: kalsiyumla birlikte kemikleri oluşturan bir minerali
+    ranges:
+      any: {low: 2.5, high: 4.5}
+    critical: {low: 1.0, high: null}
+    low_context: can be seen with low vitamin D, poor nutrition, or some antacids
+    low_context_tr: D vitamini düşüklüğünde, yetersiz beslenmede veya bazı mide ilaçlarıyla görülebilir
+    high_context: can be seen with reduced kidney function
+    high_context_tr: böbrek işlevi azaldığında görülebilir
 
   alt:
     name: ALT
+    name_tr: ALT (SGPT)
     aliases: [sgpt, alanin aminotransferaz]
+    mentions: [ALT]
+    mentions_tr: [ALT]
     unit: U/L
     decimals: 0
     measures: an enzyme found mostly in the liver
+    measures_tr: çoğunlukla karaciğerde bulunan bir enzimi
     ranges:
       any: {low: null, high: 55}
     high_context: can be seen with fatty liver, alcohol use, some medicines, viral infections, or recent hard exercise
+    high_context_tr: karaciğer yağlanması, alkol kullanımı, bazı ilaçlar, viral enfeksiyonlar veya yakın zamanda yapılan ağır egzersizle görülebilir
 
   ast:
     name: AST
+    name_tr: AST (SGOT)
     aliases: [sgot, aspartat aminotransferaz]
+    mentions: [AST]
+    mentions_tr: [AST]
     unit: U/L
     decimals: 0
     measures: an enzyme found in the liver and in muscle
+    measures_tr: karaciğerde ve kaslarda bulunan bir enzimi
     ranges:
       any: {low: null, high: 48}
     high_context: can be seen with liver irritation, alcohol use, some medicines, or recent hard exercise
+    high_context_tr: karaciğerin etkilenmesi, alkol kullanımı, bazı ilaçlar veya yakın zamanda yapılan ağır egzersizle görülebilir
 
   alp:
     name: Alkaline phosphatase
+    name_tr: Alkalen fosfataz (ALP)
     aliases: [alp, alkalen fosfataz]
-    mentions: [alkaline phosphatase, alp]
+    mentions: [alkaline phosphatase, ALP]
+    mentions_tr: [alkalen fosfataz, ALP]
     unit: U/L
     decimals: 0
     measures: an enzyme related to the liver, bile ducts and bones
+    measures_tr: karaciğer, safra yolları ve kemiklerle ilişkili bir enzimi
     ranges:
       any: {low: 40, high: 129}
     low_context: mildly low values are often not significant
+    low_context_tr: hafif düşük değerler çoğu zaman anlamlı değildir
     high_context: can be seen with bile duct or liver conditions, bone growth or healing, or pregnancy
+    high_context_tr: safra yolu veya karaciğer sorunlarında, kemik büyümesi ya da iyileşmesinde veya gebelikte görülebilir
+
+  ggt:
+    name: GGT
+    name_tr: GGT (gama glutamil transferaz)
+    aliases: [gama glutamil transferaz, gamma glutamil transferaz, gamma gt, gama gt]
+    mentions: [GGT]
+    mentions_tr: [GGT]
+    unit: U/L
+    decimals: 0
+    measures: an enzyme from the liver and bile ducts that reacts strongly to alcohol and some medicines
+    measures_tr: karaciğer ve safra yollarından gelen, alkole ve bazı ilaçlara güçlü tepki veren bir enzimi
+    ranges:
+      male: {low: null, high: 61}
+      female: {low: null, high: 36}
+    high_context: can be seen with alcohol use, fatty liver, bile duct conditions, or some medicines
+    high_context_tr: alkol kullanımı, karaciğer yağlanması, safra yolu sorunları veya bazı ilaçlarla görülebilir
 
   total_bilirubin:
     name: Total bilirubin
-    aliases: [bilirubin total, bilirubin (total), total bilirübin]
+    name_tr: Total bilirubin
+    aliases: [bilirubin total, bilirubin (total), total bilirübin, "bilirubin, total"]
     mentions: [bilirubin]
+    mentions_tr: [bilirubin, bilirübin]
     unit: mg/dL
     decimals: 1
     measures: a yellow substance made when old red blood cells are broken down and cleared by the liver
+    measures_tr: yaşlı alyuvarlar parçalanırken oluşan ve karaciğerin temizlediği sarı renkli bir maddeyi
     ranges:
       any: {low: null, high: 1.2}
     high_context: can be seen with a common harmless inherited trait called Gilbert syndrome, with fasting, or with liver or bile duct conditions
+    high_context_tr: Gilbert sendromu denen yaygın ve zararsız kalıtsal bir özellikte, açlıkta ya da karaciğer veya safra yolu sorunlarında görülebilir
+
+  direct_bilirubin:
+    name: Direct bilirubin
+    name_tr: Direkt bilirubin
+    aliases: [bilirubin direkt, bilirubin (direkt), direkt bilirübin, "bilirubin, direkt", konjuge bilirubin]
+    mentions: [direct bilirubin]
+    mentions_tr: [direkt bilirubin, direkt bilirübin]
+    unit: mg/dL
+    decimals: 2
+    measures: the part of bilirubin that the liver has already processed
+    measures_tr: bilirubinin karaciğer tarafından işlenmiş olan kısmını
+    ranges:
+      any: {low: null, high: 0.3}
+    high_context: can be seen when bile does not drain freely, for example with bile duct or liver conditions
+    high_context_tr: safra rahat akamadığında, örneğin safra yolu veya karaciğer sorunlarında görülebilir
 
   albumin:
     name: Albumin
+    name_tr: Albümin
     aliases: [albümin]
+    mentions: [albumin]
+    mentions_tr: [albümin, albumin]
     unit: g/dL
     decimals: 1
     measures: the main protein in blood, made by the liver
+    measures_tr: karaciğerin ürettiği, kandaki başlıca proteini
     ranges:
       any: {low: 3.5, high: 5.0}
     low_context: can be seen with inflammation, poor nutrition, or liver or kidney conditions
+    low_context_tr: iltihap, yetersiz beslenme ya da karaciğer veya böbrek sorunlarıyla görülebilir
     high_context: can be seen with dehydration
+    high_context_tr: sıvı kaybında görülebilir
+
+  total_protein:
+    name: Total protein
+    name_tr: Total protein
+    aliases: [protein total, protein (total), "protein, total"]
+    mentions: [total protein]
+    mentions_tr: [total protein, toplam protein]
+    unit: g/dL
+    decimals: 1
+    measures: the total amount of protein in the blood, mostly albumin and antibodies
+    measures_tr: kandaki toplam protein miktarını; bunun çoğu albümin ve antikorlardır
+    ranges:
+      any: {low: 6.3, high: 7.9}
+    low_context: can be seen with poor nutrition or with liver or kidney conditions
+    low_context_tr: yetersiz beslenmede ya da karaciğer veya böbrek sorunlarında görülebilir
+    high_context: can be seen with dehydration or with long-lasting inflammation
+    high_context_tr: sıvı kaybında veya uzun süren iltihapta görülebilir
+
+  ldh:
+    name: LDH
+    name_tr: LDH (laktat dehidrogenaz)
+    aliases: [laktat dehidrogenaz]
+    mentions: [LDH]
+    mentions_tr: [LDH]
+    unit: U/L
+    decimals: 0
+    measures: an enzyme present in almost every tissue, released when cells are damaged
+    measures_tr: hemen her dokuda bulunan ve hücreler zarar gördüğünde kana geçen bir enzimi
+    ranges:
+      any: {low: null, high: 222}
+    high_context: is not specific; it can be seen after hard exercise, when the sample was damaged during collection, or with many kinds of tissue injury
+    high_context_tr: belirli bir duruma özgü değildir; ağır egzersizden sonra, kan örneği alınırken zarar gördüğünde veya birçok doku hasarında görülebilir
 
   total_cholesterol:
     name: Total cholesterol
+    name_tr: Total kolesterol
     aliases: [cholesterol, kolesterol, total kolesterol]
+    mentions: [total cholesterol]
+    mentions_tr: [total kolesterol, toplam kolesterol]
     unit: mg/dL
     decimals: 0
     measures: the total amount of cholesterol in the blood
+    measures_tr: kandaki toplam kolesterol miktarını
     ranges:
       any: {low: null, high: 199}
     high_context: can be related to diet, body weight, physical activity, family history, or thyroid function
+    high_context_tr: beslenme, kilo, fiziksel aktivite, aile öyküsü veya tiroid işleviyle ilişkili olabilir
 
   ldl_cholesterol:
     name: LDL cholesterol
+    name_tr: LDL kolesterol
     aliases: [ldl, ldl kolesterol]
-    mentions: [ldl]
+    mentions: [LDL]
+    mentions_tr: [LDL]
     unit: mg/dL
     decimals: 0
     measures: the cholesterol that can build up in artery walls
+    measures_tr: damar duvarlarında birikebilen kolesterolü
     ranges:
       any: {low: null, high: 99}
     high_context: can be related to diet, body weight, physical activity, or family history; what counts as a good level depends on a person's overall heart risk
+    high_context_tr: beslenme, kilo, fiziksel aktivite veya aile öyküsüyle ilişkili olabilir; hangi düzeyin iyi sayılacağı kişinin genel kalp riskine bağlıdır
 
   hdl_cholesterol:
     name: HDL cholesterol
+    name_tr: HDL kolesterol
     aliases: [hdl, hdl kolesterol]
-    mentions: [hdl]
+    mentions: [HDL]
+    mentions_tr: [HDL]
     unit: mg/dL
     decimals: 0
     measures: the cholesterol that helps carry other cholesterol away from the arteries
+    measures_tr: diğer kolesterolün damarlardan uzaklaştırılmasına yardım eden kolesterolü
     ranges:
       male: {low: 40, high: null}
       female: {low: 50, high: null}
     low_context: can be related to low physical activity, smoking, or excess body weight
+    low_context_tr: az fiziksel aktivite, sigara kullanımı veya fazla kiloyla ilişkili olabilir
 
   triglycerides:
     name: Triglycerides
-    aliases: [tg, trigliserid]
+    name_tr: Trigliserid
+    aliases: [tg, trigliserid, trigliserit]
+    mentions: [triglyceride]
+    mentions_tr: [trigliserid, trigliserit]
     unit: mg/dL
     decimals: 0
     measures: a type of fat in the blood
+    measures_tr: kandaki bir yağ türünü
     ranges:
       any: {low: null, high: 149}
     high_context: can be seen if the sample was not fasting, with alcohol, sugary foods, excess body weight, or high blood sugar
+    high_context_tr: örnek aç karnına alınmadıysa, alkol, şekerli besinler, fazla kilo veya yüksek kan şekeriyle görülebilir
 
   tsh:
     name: TSH
+    name_tr: TSH
+    aliases: [tiroid stimülan hormon, tiroid uyarıcı hormon]
+    mentions: [TSH]
+    mentions_tr: [TSH]
     unit: mIU/L
     decimals: 2
     measures: the signal from the brain that tells the thyroid gland how hard to work
+    measures_tr: beynin tiroid bezine ne kadar çalışması gerektiğini bildiren sinyali
     ranges:
       any: {low: 0.3, high: 4.2}
     low_context: can be seen when the thyroid is more active than needed or with too high a dose of thyroid medicine
+    low_context_tr: tiroid gereğinden fazla çalıştığında veya tiroid ilacının dozu yüksek geldiğinde görülebilir
     high_context: can be seen when the thyroid is less active than needed
+    high_context_tr: tiroid gereğinden az çalıştığında görülebilir
 
   free_t4:
     name: Free T4
+    name_tr: Serbest T4
     aliases: [ft4, st4, serbest t4]
-    mentions: [free t4, t4]
+    mentions: [free T4, T4]
+    mentions_tr: [serbest T4, T4]
     unit: ng/dL
     decimals: 2
     measures: the main hormone released by the thyroid gland
+    measures_tr: tiroid bezinin salgıladığı ana hormonu
     ranges:
       any: {low: 0.9, high: 1.7}
     low_context: can be seen when the thyroid is less active than needed
+    low_context_tr: tiroid gereğinden az çalıştığında görülebilir
     high_context: can be seen when the thyroid is more active than needed
+    high_context_tr: tiroid gereğinden fazla çalıştığında görülebilir
+
+  free_t3:
+    name: Free T3
+    name_tr: Serbest T3
+    aliases: [ft3, st3, serbest t3]
+    mentions: [free T3, T3]
+    mentions_tr: [serbest T3, T3]
+    unit: pg/mL
+    decimals: 2
+    measures: the active form of thyroid hormone
+    measures_tr: tiroid hormonunun etkin biçimini
+    ranges:
+      any: {low: 2.0, high: 4.4}
+    low_context: can be seen when the thyroid is less active than needed, and also during other illnesses
+    low_context_tr: tiroid gereğinden az çalıştığında ve başka hastalıklar sırasında da görülebilir
+    high_context: can be seen when the thyroid is more active than needed
+    high_context_tr: tiroid gereğinden fazla çalıştığında görülebilir
 
   ferritin:
     name: Ferritin
+    name_tr: Ferritin
+    mentions: [ferritin]
+    mentions_tr: [ferritin]
     unit: ng/mL
     decimals: 0
     measures: the amount of iron stored in the body
+    measures_tr: vücutta depolanan demir miktarını
     ranges:
       male: {low: 24, high: 336}
       female: {low: 11, high: 307}
     low_context: points to low iron stores, which can come from diet, heavy periods, or blood loss
+    low_context_tr: demir depolarının azaldığını gösterir; bu beslenmeden, yoğun adet kanamalarından veya kan kaybından kaynaklanabilir
     high_context: can be seen with inflammation or infection, liver conditions, or too much stored iron
+    high_context_tr: iltihap veya enfeksiyonda, karaciğer sorunlarında ya da vücutta fazla demir biriktiğinde görülebilir
+
+  iron:
+    name: Iron
+    name_tr: Demir (serum)
+    aliases: [demir, serum demir, demir (serum), fe]
+    mentions: [serum iron, iron level, iron in your blood, blood iron, iron is, iron was, your iron]
+    mentions_tr: [serum demir, demir düzey, kandaki demir, demir değer, demiriniz, demir (serum)]
+    unit: µg/dL
+    decimals: 0
+    measures: the amount of iron travelling in the blood at the moment the sample was taken
+    measures_tr: kan alındığı anda kanda dolaşan demir miktarını
+    ranges:
+      male: {low: 50, high: 150}
+      female: {low: 35, high: 145}
+    low_context: can be seen with low iron intake, blood loss, or inflammation; it changes during the day and is read together with ferritin
+    low_context_tr: az demir alımında, kan kaybında veya iltihapta görülebilir; gün içinde değişir ve ferritinle birlikte değerlendirilir
+    high_context: can be seen after iron tablets or an iron-rich meal, or with too much stored iron
+    high_context_tr: demir hapından veya demirden zengin bir öğünden sonra ya da vücutta fazla demir biriktiğinde görülebilir
+
+  tibc:
+    name: TIBC
+    name_tr: Demir bağlama kapasitesi (TDBK)
+    aliases: [tdbk, total demir bağlama kapasitesi, demir bağlama kapasitesi, tibc]
+    mentions: [TIBC, iron-binding capacity, iron binding capacity]
+    mentions_tr: [TDBK, demir bağlama kapasite]
+    unit: µg/dL
+    decimals: 0
+    measures: how much iron the blood could carry if every carrier protein were filled
+    measures_tr: taşıyıcı proteinlerin tamamı dolsaydı kanın ne kadar demir taşıyabileceğini
+    ranges:
+      any: {low: 250, high: 400}
+    low_context: can be seen with inflammation or long-term health conditions
+    low_context_tr: iltihapta veya uzun süreli sağlık sorunlarında görülebilir
+    high_context: rises when the body is short of iron
+    high_context_tr: vücutta demir azaldığında yükselir
 
   vitamin_b12:
     name: Vitamin B12
-    aliases: [b12, b12 vitamini]
-    mentions: [b12]
+    name_tr: B12 vitamini
+    aliases: [b12, b12 vitamini, vitamin b12, kobalamin]
+    mentions: [B12]
+    mentions_tr: [B12]
     unit: pg/mL
     decimals: 0
     measures: a vitamin needed for nerves and for making red blood cells
+    measures_tr: sinirler ve alyuvar yapımı için gereken bir vitamini
     ranges:
       any: {low: 180, high: 914}
     low_context: can be seen with diets low in animal products, some stomach medicines, or reduced absorption in the gut
+    low_context_tr: hayvansal ürünlerin az tüketildiği beslenmede, bazı mide ilaçlarıyla veya bağırsaktan emilim azaldığında görülebilir
     high_context: is most often related to supplements
+    high_context_tr: çoğunlukla takviye kullanımıyla ilişkilidir
+
+  folate:
+    name: Folate
+    name_tr: Folat (folik asit)
+    aliases: [folat, folik asit, folate]
+    mentions: [folate, folic acid]
+    mentions_tr: [folat, folik asit]
+    unit: ng/mL
+    decimals: 1
+    measures: a vitamin needed for making red blood cells
+    measures_tr: alyuvar yapımı için gereken bir vitamini
+    ranges:
+      any: {low: 4.0, high: null}
+    low_context: can be seen with a diet low in green vegetables, regular alcohol use, or some medicines
+    low_context_tr: yeşil sebzelerin az tüketildiği beslenmede, düzenli alkol kullanımında veya bazı ilaçlarla görülebilir
 
   vitamin_d:
     name: Vitamin D (25-hydroxy)
-    aliases: [vitamin d, d vitamini, 25-oh vitamin d]
-    mentions: [vitamin d]
+    name_tr: D vitamini (25-OH)
+    aliases: [vitamin d, d vitamini, 25-oh vitamin d, 25 oh vitamin d, 25-hidroksi vitamin d]
+    mentions: [vitamin D]
+    mentions_tr: [D vitamin]
     unit: ng/mL
     decimals: 0
     measures: the body's vitamin D stores, which matter for bones
+    measures_tr: kemikler için önemli olan, vücuttaki D vitamini depolarını
     ranges:
       any: {low: 20, high: 50}
     low_context: is common with little sun exposure, darker skin, or during winter
+    low_context_tr: güneşe az çıkanlarda, koyu tenlilerde veya kış aylarında sık görülür
     high_context: is most often related to supplements
+    high_context_tr: çoğunlukla takviye kullanımıyla ilişkilidir
 
   crp:
     name: C-reactive protein
-    aliases: [crp]
-    mentions: [c-reactive protein, crp]
+    name_tr: CRP (C-reaktif protein)
+    aliases: [crp, c-reaktif protein, c reaktif protein]
+    mentions: [C-reactive protein, CRP]
+    mentions_tr: [CRP, C-reaktif protein]
     unit: mg/L
     decimals: 1
     measures: a protein that rises when there is inflammation somewhere in the body
+    measures_tr: vücudun herhangi bir yerinde iltihap olduğunda yükselen bir proteini
     ranges:
       any: {low: null, high: 8.0}
     high_context: can be seen with infections, injuries, or long-term inflammatory conditions; it does not show where the inflammation is
+    high_context_tr: enfeksiyonlarda, yaralanmalarda veya uzun süreli iltihabi durumlarda görülebilir; iltihabın nerede olduğunu göstermez
+
+  esr:
+    name: Sedimentation rate (ESR)
+    name_tr: Sedimantasyon (ESR)
+    aliases: [esr, sedimantasyon, sedim, eritrosit sedimantasyon hızı]
+    mentions: [sedimentation, ESR]
+    mentions_tr: [sedimantasyon, sedim, ESR]
+    unit: mm/h
+    decimals: 0
+    measures: how quickly red blood cells settle in a tube, which speeds up when there is inflammation
+    measures_tr: alyuvarların bir tüpte ne kadar hızlı çöktüğünü; iltihap olduğunda bu hız artar
+    ranges:
+      male: {low: null, high: 22}
+      female: {low: null, high: 29}
+    high_context: can be seen with infection, inflammation, anemia, pregnancy, or older age; it does not show where the problem is
+    high_context_tr: enfeksiyon, iltihap, kansızlık, gebelik veya ileri yaşla görülebilir; sorunun nerede olduğunu göstermez
+
+  ck:
+    name: Creatine kinase (CK)
+    name_tr: Kreatin kinaz (CK)
+    aliases: [ck, kreatin kinaz, cpk]
+    mentions: [creatine kinase, CK]
+    mentions_tr: [kreatin kinaz, CK]
+    unit: U/L
+    decimals: 0
+    measures: an enzyme released from muscle
+    measures_tr: kaslardan kana geçen bir enzimi
+    ranges:
+      male: {low: null, high: 308}
+      female: {low: null, high: 192}
+    high_context: can be seen after hard exercise, a muscle injury or an injection into a muscle, or with some cholesterol medicines
+    high_context_tr: ağır egzersizden, kas yaralanmasından veya kas içine yapılan bir iğneden sonra ya da bazı kolesterol ilaçlarıyla görülebilir

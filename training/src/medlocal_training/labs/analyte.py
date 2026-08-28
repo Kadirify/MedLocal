@@ -11,6 +11,11 @@ class Sex(StrEnum):
     FEMALE = "female"
 
 
+class Language(StrEnum):
+    ENGLISH = "en"
+    TURKISH = "tr"
+
+
 class _Frozen(BaseModel):
     model_config = ConfigDict(frozen=True, extra="forbid")
 
@@ -35,15 +40,20 @@ class CriticalLimits(_Frozen):
 
 class Analyte(_Frozen):
     name: str
+    name_tr: str
     unit: str
     decimals: NonNegativeInt
     measures: str
+    measures_tr: str
     ranges: dict[str, ReferenceRange]
     critical: CriticalLimits = CriticalLimits()
     aliases: tuple[str, ...] = ()
-    mentions: tuple[str, ...] = ()
+    mentions: tuple[str, ...]
+    mentions_tr: tuple[str, ...]
     low_context: str | None = None
+    low_context_tr: str | None = None
     high_context: str | None = None
+    high_context_tr: str | None = None
 
     @model_validator(mode="after")
     def _is_consistent(self) -> Self:
@@ -51,18 +61,31 @@ class Analyte(_Frozen):
         if keys != {"any"} and keys != {Sex.MALE.value, Sex.FEMALE.value}:
             raise ValueError(f"{self.name}: ranges must be 'any' or both sexes, got {sorted(keys)}")
 
-        for reference in self.ranges.values():
-            if reference.low is not None and self.low_context is None:
-                raise ValueError(f"{self.name}: a low bound needs low_context")
-            if reference.high is not None and self.high_context is None:
-                raise ValueError(f"{self.name}: a high bound needs high_context")
+        for side in ("low", "high"):
+            bounded = any(getattr(r, side) is not None for r in self.ranges.values())
+            for field in (f"{side}_context", f"{side}_context_tr"):
+                if bounded and getattr(self, field) is None:
+                    raise ValueError(f"{self.name}: a {side} bound needs {field}")
         return self
 
     def range_for(self, sex: Sex) -> ReferenceRange:
         return self.ranges.get("any") or self.ranges[sex.value]
 
-    def search_terms(self) -> tuple[str, ...]:
-        return self.mentions or (self.name.lower(),)
+    def display_name(self, language: Language) -> str:
+        return self.name_tr if language is Language.TURKISH else self.name
+
+    def measured_thing(self, language: Language) -> str:
+        return self.measures_tr if language is Language.TURKISH else self.measures
+
+    def search_terms(self, language: Language) -> tuple[str, ...]:
+        return self.mentions_tr if language is Language.TURKISH else self.mentions
+
+    def context(self, side: str, language: Language) -> str:
+        suffix = "_tr" if language is Language.TURKISH else ""
+        text: str | None = getattr(self, f"{side}_context{suffix}")
+        if text is None:
+            raise ValueError(f"{self.name} has no {side} context")
+        return text
 
 
 class AnalyteCatalog(_Frozen):
