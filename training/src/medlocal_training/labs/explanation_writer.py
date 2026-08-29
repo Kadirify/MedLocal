@@ -2,15 +2,16 @@ import json
 from typing import Protocol
 from urllib.request import Request, urlopen
 
+from medlocal_training.labs.analyte import Language
 from medlocal_training.labs.prompt import to_teacher_messages
 from medlocal_training.labs.report import LabReport
 
-_MAX_TOKENS = 500
+_MAX_TOKENS = 900
 _CONTEXT_TOKENS = 4096
 
 
 class ExplanationWriter(Protocol):
-    def write(self, report: LabReport, attempt: int) -> str: ...
+    def write(self, report: LabReport, language: Language, attempt: int) -> str: ...
 
 
 class OllamaExplanationWriter:
@@ -24,10 +25,10 @@ class OllamaExplanationWriter:
         self._temperature = temperature
         self._timeout_seconds = timeout_seconds
 
-    def write(self, report: LabReport, attempt: int) -> str:
+    def write(self, report: LabReport, language: Language, attempt: int) -> str:
         body = {
             "model": self._model,
-            "messages": to_teacher_messages(report),
+            "messages": to_teacher_messages(report, language),
             "stream": False,
             "think": False,
             "options": {

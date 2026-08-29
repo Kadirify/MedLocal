@@ -7,12 +7,13 @@ from urllib.request import Request, urlopen
 import torch
 from transformers import PreTrainedModel, PreTrainedTokenizerBase
 
+from medlocal_training.labs.analyte import Language
 from medlocal_training.labs.prompt import to_explanation_messages
 from medlocal_training.labs.report import LabReport
 
 
 class Explainer(Protocol):
-    def explain(self, reports: Sequence[LabReport]) -> list[str]: ...
+    def explain(self, reports: Sequence[tuple[LabReport, Language]]) -> list[str]: ...
 
 
 class CausalLmExplainer:
@@ -31,15 +32,17 @@ class CausalLmExplainer:
         self._tokenizer.padding_side = "left"
 
     @torch.inference_mode()
-    def explain(self, reports: Sequence[LabReport]) -> list[str]:
+    def explain(self, reports: Sequence[tuple[LabReport, Language]]) -> list[str]:
         explanations: list[str] = []
 
         for batch in batched(reports, self._batch_size):
             prompts = [
                 self._tokenizer.apply_chat_template(
-                    to_explanation_messages(report), tokenize=False, add_generation_prompt=True
+                    to_explanation_messages(report, language),
+                    tokenize=False,
+                    add_generation_prompt=True,
                 )
-                for report in batch
+                for report, language in batch
             ]
             encoded = self._tokenizer(prompts, return_tensors="pt", padding=True)
             encoded = encoded.to(self._model.device)
@@ -63,13 +66,13 @@ class OllamaExplainer:
         self._max_new_tokens = max_new_tokens
         self._timeout_seconds = timeout_seconds
 
-    def explain(self, reports: Sequence[LabReport]) -> list[str]:
-        return [self._explain(report) for report in reports]
+    def explain(self, reports: Sequence[tuple[LabReport, Language]]) -> list[str]:
+        return [self._explain(report, language) for report, language in reports]
 
-    def _explain(self, report: LabReport) -> str:
+    def _explain(self, report: LabReport, language: Language) -> str:
         body = {
             "model": self._model,
-            "messages": to_explanation_messages(report),
+            "messages": to_explanation_messages(report, language),
             "stream": False,
             "think": False,
             "options": {"temperature": 0, "num_predict": self._max_new_tokens},

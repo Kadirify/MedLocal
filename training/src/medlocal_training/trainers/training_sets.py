@@ -30,7 +30,10 @@ def _pubmedqa(data: PubMedQaData, split: SplitName, seed: int) -> list[TrainingE
 def _lab_explanations(data: LabExplanationData, split: SplitName) -> list[TrainingExample]:
     catalog = AnalyteCatalog.read(data.catalog_file)
     return [
-        TrainingExample(to_explanation_messages(example.to_report(catalog)), example.explanation)
+        TrainingExample(
+            to_explanation_messages(example.to_report(catalog), example.language),
+            example.explanation,
+        )
         for example in read_examples(data.examples_file)
         if example.split == split
     ]

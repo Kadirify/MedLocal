@@ -2,17 +2,18 @@ from pathlib import Path
 
 import pytest
 
-from medlocal_training.labs.analyte import AnalyteCatalog, Sex
+from medlocal_training.labs.analyte import AnalyteCatalog, Language, Sex
 from medlocal_training.labs.evaluation import score_explanations
 from medlocal_training.labs.report import LabReport, LabResult
 
 CATALOG = AnalyteCatalog.read(Path(__file__).parents[3] / "reference" / "analytes.yaml")
 FERRITIN = CATALOG.analytes["ferritin"]
-REPORT = LabReport(
+LAB_REPORT = LabReport(
     sex=Sex.FEMALE,
     age=30,
     results=(LabResult("ferritin", FERRITIN, 5, FERRITIN.range_for(Sex.FEMALE)),),
 )
+REPORT = (LAB_REPORT, Language.ENGLISH)
 FILLER = " ".join(["This sentence only adds length to the text."] * 6)
 CAREFUL = f"Here is an overview. Ferritin is low. {FILLER} Please talk to your doctor."
 CARELESS = f"Here is an overview. Ferritin is low. {FILLER} You have anemia."

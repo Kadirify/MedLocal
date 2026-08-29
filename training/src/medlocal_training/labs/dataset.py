@@ -7,7 +7,7 @@ from pathlib import Path
 from pydantic import BaseModel, ConfigDict
 
 from medlocal_training.data.source import SplitName
-from medlocal_training.labs.analyte import AnalyteCatalog, Sex
+from medlocal_training.labs.analyte import AnalyteCatalog, Language, Sex
 from medlocal_training.labs.explanation_checks import failed_checks
 from medlocal_training.labs.explanation_writer import ExplanationWriter
 from medlocal_training.labs.report import LabReport, LabResult
@@ -28,6 +28,7 @@ class LabExplanationExample(BaseModel):
 
     id: str
     split: SplitName
+    language: Language
     sex: Sex
     age: int
     results: tuple[StoredResult, ...]
@@ -35,12 +36,18 @@ class LabExplanationExample(BaseModel):
 
     @classmethod
     def from_report(
-        cls, example_id: str, split: SplitName, report: LabReport, explanation: str
+        cls,
+        example_id: str,
+        split: SplitName,
+        language: Language,
+        report: LabReport,
+        explanation: str,
     ) -> "LabExplanationExample":
         results = tuple(StoredResult(analyte=r.key, value=r.value) for r in report.results)
         return cls(
             id=example_id,
             split=split,
+            language=language,
             sex=report.sex,
             age=report.age,
             results=results,
@@ -92,17 +99,19 @@ def build_examples(
     rejected: Counter[str] = Counter()
 
     with output.open("a", encoding="utf-8") as file:
-        for example_id, split in _planned_ids(sizes):
+        for example_id, split, language in _planned_examples(sizes):
             report = generator.generate()
             if example_id in present:
                 continue
 
-            explanation = _write_accepted(writer, report, max_attempts, rejected)
+            explanation = _write_accepted(writer, report, language, max_attempts, rejected)
             if explanation is None:
                 gave_up += 1
                 continue
 
-            example = LabExplanationExample.from_report(example_id, split, report, explanation)
+            example = LabExplanationExample.from_report(
+                example_id, split, language, report, explanation
+            )
             file.write(example.model_dump_json() + "\n")
             file.flush()
             written += 1
@@ -110,18 +119,25 @@ def build_examples(
     return BuildSummary(written, len(present), gave_up, dict(rejected))
 
 
-def _planned_ids(sizes: dict[SplitName, int]) -> Iterator[tuple[str, SplitName]]:
+def _planned_examples(
+    sizes: dict[SplitName, int],
+) -> Iterator[tuple[str, SplitName, Language]]:
+    languages = list(Language)
     for split, size in sizes.items():
         for index in range(size):
-            yield f"{split}-{index:05d}", split
+            yield f"{split}-{index:05d}", split, languages[index % len(languages)]
 
 
 def _write_accepted(
-    writer: ExplanationWriter, report: LabReport, max_attempts: int, rejected: Counter[str]
+    writer: ExplanationWriter,
+    report: LabReport,
+    language: Language,
+    max_attempts: int,
+    rejected: Counter[str],
 ) -> str | None:
     for attempt in range(max_attempts):
-        explanation = _BLANK_LINES.sub("\n", writer.write(report, attempt))
-        failures = failed_checks(report, explanation)
+        explanation = _BLANK_LINES.sub("\n", writer.write(report, language, attempt))
+        failures = failed_checks(report, explanation, language)
         if not failures:
             return explanation
         rejected.update(failures)

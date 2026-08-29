@@ -1,45 +1,61 @@
 from pathlib import Path
 
-from medlocal_training.labs.analyte import AnalyteCatalog
+from medlocal_training.labs.analyte import AnalyteCatalog, Language
 from medlocal_training.labs.dataset import build_examples, read_examples
 from medlocal_training.labs.prompt import render_report
-from medlocal_training.labs.report import LabReport
+from medlocal_training.labs.report import Flag, LabReport, LabResult
 from medlocal_training.labs.synthetic import SyntheticReportGenerator
 
 CATALOG = AnalyteCatalog.read(Path(__file__).parents[3] / "reference" / "analytes.yaml")
 FILLER = " ".join(["This sentence only adds length to the text."] * 6)
+
+_STATEMENT = {Language.ENGLISH: "{name} is {side}.", Language.TURKISH: "{name} {side} çıktı."}
+_SIDE = {
+    Language.ENGLISH: {Flag.LOW: "low", Flag.HIGH: "high"},
+    Language.TURKISH: {Flag.LOW: "düşük", Flag.HIGH: "yüksek"},
+}
+_CLOSING = {
+    Language.ENGLISH: "Please talk to your doctor.",
+    Language.TURKISH: "Lütfen doktorunuzla konuşun.",
+}
+
+
+def _statement(result: LabResult, language: Language) -> str:
+    name = result.analyte.search_terms(language)[0]
+    return _STATEMENT[language].format(name=name, side=_SIDE[language][result.flag])
 
 
 class CarefulWriter:
     def __init__(self) -> None:
         self.calls = 0
 
-    def write(self, report: LabReport, attempt: int) -> str:
+    def write(self, report: LabReport, language: Language, attempt: int) -> str:
         self.calls += 1
-        flagged = " ".join(f"{r.analyte.name} is {r.flag.value.lower()}." for r in report.flagged())
-        return f"Here is an overview. {flagged} {FILLER} Please talk to your doctor."
+        flagged = " ".join(_statement(result, language) for result in report.flagged())
+        return f"{flagged} {FILLER} {_CLOSING[language]}"
 
 
 class SloppyThenCarefulWriter(CarefulWriter):
-    def write(self, report: LabReport, attempt: int) -> str:
-        text = super().write(report, attempt)
+    def write(self, report: LabReport, language: Language, attempt: int) -> str:
+        text = super().write(report, language, attempt)
         return "Too short." if attempt == 0 else text
 
 
-def test_writes_every_planned_example(tmp_path: Path) -> None:
+def test_writes_every_planned_example_alternating_languages(tmp_path: Path) -> None:
     output = tmp_path / "examples.jsonl"
 
     summary = build_examples(
         SyntheticReportGenerator(CATALOG, seed=1),
         CarefulWriter(),
-        {"test": 3, "train": 5},
+        {"test": 4, "train": 6},
         max_attempts=1,
         output=output,
     )
 
     examples = read_examples(output)
-    assert summary.written == 8
-    assert [e.split for e in examples] == ["test"] * 3 + ["train"] * 5
+    assert summary.written == 10
+    assert [e.split for e in examples] == ["test"] * 4 + ["train"] * 6
+    assert [e.language for e in examples[:4]] == [Language.ENGLISH, Language.TURKISH] * 2
 
 
 def test_a_rejected_attempt_is_retried(tmp_path: Path) -> None:
@@ -78,4 +94,5 @@ def test_a_stored_example_rebuilds_the_same_report(tmp_path: Path) -> None:
 
     rebuilt = read_examples(output)[0].to_report(CATALOG)
 
-    assert render_report(rebuilt) == render_report(SyntheticReportGenerator(CATALOG, 5).generate())
+    original = SyntheticReportGenerator(CATALOG, 5).generate()
+    assert render_report(rebuilt, Language.ENGLISH) == render_report(original, Language.ENGLISH)

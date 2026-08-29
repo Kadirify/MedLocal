@@ -3,6 +3,7 @@ from collections.abc import Sequence
 from dataclasses import dataclass
 
 from medlocal_training.evaluation.text_overlap import rouge_l
+from medlocal_training.labs.analyte import Language
 from medlocal_training.labs.explanation_checks import failed_checks
 from medlocal_training.labs.report import LabReport
 
@@ -17,14 +18,19 @@ class ExplanationMetrics:
 
 
 def score_explanations(
-    reports: Sequence[LabReport], teacher: Sequence[str], generated: Sequence[str]
+    reports: Sequence[tuple[LabReport, Language]],
+    teacher: Sequence[str],
+    generated: Sequence[str],
 ) -> ExplanationMetrics:
     if not (len(reports) == len(teacher) == len(generated)):
         raise ValueError("reports, teacher texts and generated texts differ in length")
     if not reports:
         raise ValueError("cannot score an empty set")
 
-    failures = [failed_checks(r, text) for r, text in zip(reports, generated, strict=True)]
+    failures = [
+        failed_checks(report, text, language)
+        for (report, language), text in zip(reports, generated, strict=True)
+    ]
     per_check = Counter(name for failed in failures for name in failed)
     count = len(reports)
 

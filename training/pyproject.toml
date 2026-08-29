@@ -52,6 +52,8 @@ src = ["src", "tests"]
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "B", "UP", "SIM", "PTH", "RUF"]
+# Turkish prompts and patterns use letters that ruff takes for look-alikes of ASCII ones
+ignore = ["RUF001", "RUF002", "RUF003"]
 
 [tool.mypy]
 strict = true

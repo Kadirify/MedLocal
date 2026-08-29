@@ -18,6 +18,7 @@ from medlocal_training.export.gguf import LlamaCppNotFoundError, convert_to_gguf
 from medlocal_training.export.merge import merge_adapter
 from medlocal_training.labs.analyte import AnalyteCatalog
 from medlocal_training.labs.config import ExplanationEvaluationConfig, LabDatasetConfig
+from medlocal_training.labs.contract import write_prompt_contract
 from medlocal_training.labs.dataset import build_examples, read_examples
 from medlocal_training.labs.evaluation import score_explanations
 from medlocal_training.labs.explainer import CausalLmExplainer, Explainer, OllamaExplainer
@@ -120,6 +121,12 @@ def _build_lab_dataset(args: argparse.Namespace) -> int:
     return 0
 
 
+def _write_prompt_contract(args: argparse.Namespace) -> int:
+    write_prompt_contract(AnalyteCatalog.read(args.catalog), args.out)
+    print(f"prompt contract -> {args.out}")
+    return 0
+
+
 def _causal_lm_explainer(config: ExplanationEvaluationConfig) -> Explainer:
     require_cuda()
     model, tokenizer = load_quantized_causal_lm(config.model_id, config.adapter_dir)
@@ -141,8 +148,12 @@ _EXPLAINERS: dict[str, Callable[[ExplanationEvaluationConfig], Explainer]] = {
 def _evaluate_explanations(args: argparse.Namespace) -> int:
     config = ExplanationEvaluationConfig.read(args.config)
     catalog = AnalyteCatalog.read(config.catalog_file)
-    examples = [e for e in read_examples(config.examples_file) if e.split == config.split]
-    reports = [example.to_report(catalog) for example in examples]
+    examples = [
+        example
+        for example in read_examples(config.examples_file)
+        if example.split == config.split and config.language in (None, example.language)
+    ]
+    reports = [(example.to_report(catalog), example.language) for example in examples]
 
     generated = _EXPLAINERS[config.explainer](config).explain(reports)
     metrics = score_explanations(reports, [e.explanation for e in examples], generated)
@@ -198,6 +209,13 @@ def main() -> int:
     )
     lab_dataset.add_argument("config", type=Path)
     lab_dataset.set_defaults(handler=_build_lab_dataset)
+
+    contract = commands.add_parser(
+        "write-prompt-contract", help="write the explainer prompt shared with the API"
+    )
+    contract.add_argument("--catalog", type=Path, required=True)
+    contract.add_argument("--out", type=Path, required=True)
+    contract.set_defaults(handler=_write_prompt_contract)
 
     explanations = commands.add_parser(
         "evaluate-explanations", help="score generated lab explanations"
