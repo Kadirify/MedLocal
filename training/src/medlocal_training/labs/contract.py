@@ -2,7 +2,7 @@ import json
 from pathlib import Path
 
 from medlocal_training.labs.analyte import AnalyteCatalog, Language, Sex
-from medlocal_training.labs.prompt import explainer_system, render_report
+from medlocal_training.labs.prompt import explainer_system, render_report, rendering_templates
 from medlocal_training.labs.report import LabReport, LabResult
 
 _VERSION = 2
@@ -41,6 +41,7 @@ def write_prompt_contract(catalog: AnalyteCatalog, path: Path) -> None:
         "languages": {
             language.value: {
                 "system": explainer_system(language),
+                "templates": rendering_templates(language),
                 "user": render_report(report, language),
             }
             for language in Language

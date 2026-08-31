@@ -64,7 +64,7 @@ describe('reading a lab report PDF', () => {
       ['Kreatinin (Serum/Plazma)', '1,04', 'mg/dL', '0,6-1,2'],
       ['AST ( SGOT)', '23', 'U/L', '11-34'],
       ['RBC (Eritrosit Sayisi)', '5,90 H', '10^6/uL', '4,3-5,7'],
-      ['MCH (Ortalama Eritrosit Hemoglobini)', '27,3', 'pg', '26,6-33'],
+      ['IG% (Immatur Granulosit Orani)', '0,3', '%', '0-0,6'],
     ]);
 
     const { report, unrecognizedLabels } = await readLabReport.execute(pdf, 'male', 30);
@@ -75,7 +75,7 @@ describe('reading a lab report PDF', () => {
       ['ast', 23, 'NORMAL'],
       ['red_blood_cells', 5.9, 'HIGH'],
     ]);
-    expect(unrecognizedLabels).toEqual(['MCH (Ortalama Eritrosit Hemoglobini)']);
+    expect(unrecognizedLabels).toEqual(['IG% (Immatur Granulosit Orani)']);
   });
 
   it('falls back to the catalog when a row prints no range', async () => {

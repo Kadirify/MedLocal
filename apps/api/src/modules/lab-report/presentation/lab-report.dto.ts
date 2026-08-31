@@ -12,9 +12,11 @@ import {
   ValidateNested,
 } from 'class-validator';
 import type { Sex } from '../domain/analyte.js';
+import type { Language } from '../domain/language.js';
 import { LabReport, LabResult } from '../domain/lab-report.js';
 
 const SEXES: readonly Sex[] = ['male', 'female'];
+const LANGUAGES: readonly Language[] = ['tr', 'en'];
 
 export class PatientDto {
   @IsIn(SEXES)
@@ -25,6 +27,10 @@ export class PatientDto {
   @Min(18)
   @Max(120)
   age!: number;
+
+  @IsOptional()
+  @IsIn(LANGUAGES)
+  language: Language = 'tr';
 }
 
 export class ResultInputDto {
@@ -75,11 +81,11 @@ export interface LabReportView {
   readonly disclaimer: string;
 }
 
-export function toResultView(result: LabResult): ResultView {
+export function toResultView(result: LabResult, language: Language): ResultView {
   const { analyte, reference } = result;
   return {
     analyte: analyte.key,
-    name: analyte.name,
+    name: analyte.nameIn(language),
     value: result.value,
     unit: result.printedUnit ?? analyte.unit,
     decimals: analyte.decimals,
@@ -92,6 +98,6 @@ export function toResultView(result: LabResult): ResultView {
   };
 }
 
-export function toResultViews(report: LabReport): ResultView[] {
-  return report.results.map(toResultView);
+export function toResultViews(report: LabReport, language: Language): ResultView[] {
+  return report.results.map((result) => toResultView(result, language));
 }

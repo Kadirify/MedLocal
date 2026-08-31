@@ -8,7 +8,7 @@ import {
   ExplainLabReport,
   NothingToExplainError,
 } from './explain-lab-report.use-case.js';
-import { ExplanationPrompt } from './explanation-prompt.js';
+import { ExplanationPrompt, PromptWording } from './explanation-prompt.js';
 
 class RecordingGenerator extends TextGenerator {
   readonly model = 'fake';
@@ -20,17 +20,31 @@ class RecordingGenerator extends TextGenerator {
   }
 }
 
+const templates: PromptWording['templates'] = {
+  patient: 'Patient: {sex}, {age}',
+  sexes: { male: 'male', female: 'female' },
+  flags: { LOW: 'LOW', NORMAL: 'NORMAL', HIGH: 'HIGH' },
+  result: '- {name}: {value} {unit} ({reference} {range}) {flag}',
+  reference: 'reference',
+  up_to: 'up to {high}',
+  at_least: '{low} or higher',
+  between: '{low} to {high}',
+};
+const prompt = new ExplanationPrompt(1, {
+  en: { system: 'system text', templates },
+  tr: { system: 'sistem metni', templates },
+});
+
 const range = new ReferenceRange(3.6, 5.2);
+const critical = { low: 2.5, high: 6.5 };
 const potassium = new Analyte(
   'potassium',
   'Potassium',
+  'Potasyum',
   'mmol/L',
   1,
   { any: range },
-  {
-    low: 2.5,
-    high: 6.5,
-  },
+  critical,
 );
 const reportWith = (value: number) =>
   new LabReport('female', 40, [new LabResult(potassium, value, range)]);
@@ -38,27 +52,40 @@ const reportWith = (value: number) =>
 describe('ExplainLabReport', () => {
   it('streams the model reply for an ordinary report', async () => {
     const generator = new RecordingGenerator();
-    const useCase = new ExplainLabReport(generator, new ExplanationPrompt(1, 'system text'));
+    const useCase = new ExplainLabReport(generator, prompt);
 
     const pieces: string[] = [];
-    for await (const piece of useCase.execute(reportWith(3.2))) pieces.push(piece);
+    for await (const piece of useCase.execute(reportWith(3.2), 'en')) pieces.push(piece);
 
     expect(pieces.join('')).toBe('Your potassium is low.');
     expect(generator.received[0]).toEqual({ role: 'system', content: 'system text' });
-    expect(generator.received[1]?.content).toContain('Potassium: 3.2 mmol/L');
+    expect(generator.received[1]?.content).toContain('- Potassium: 3.2 mmol/L');
+  });
+
+  it('asks in the language of the reader', async () => {
+    const generator = new RecordingGenerator();
+    const useCase = new ExplainLabReport(generator, prompt);
+
+    const pieces: string[] = [];
+    for await (const piece of useCase.execute(reportWith(3.2), 'tr')) pieces.push(piece);
+
+    expect(generator.received[0]?.content).toBe('sistem metni');
+    expect(generator.received[1]?.content).toContain('- Potasyum: 3.2 mmol/L');
   });
 
   it.each([2.5, 2.1, 6.5, 7])('never sends a critical value (%s) to the model', (value) => {
     const generator = new RecordingGenerator();
-    const useCase = new ExplainLabReport(generator, new ExplanationPrompt(1, 'system text'));
+    const useCase = new ExplainLabReport(generator, prompt);
 
-    expect(() => useCase.execute(reportWith(value))).toThrow(CriticalValueError);
+    expect(() => useCase.execute(reportWith(value), 'en')).toThrow(CriticalValueError);
     expect(generator.received).toEqual([]);
   });
 
   it('refuses a report without recognised results', () => {
-    const useCase = new ExplainLabReport(new RecordingGenerator(), new ExplanationPrompt(1, 's'));
+    const useCase = new ExplainLabReport(new RecordingGenerator(), prompt);
 
-    expect(() => useCase.execute(new LabReport('male', 30, []))).toThrow(NothingToExplainError);
+    expect(() => useCase.execute(new LabReport('male', 30, []), 'en')).toThrow(
+      NothingToExplainError,
+    );
   });
 });

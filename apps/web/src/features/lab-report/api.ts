@@ -2,6 +2,7 @@ import type { ExplanationFooter, LabReport, Sex } from "./types";
 
 // same origin: next.config.ts proxies /api to the API server
 const API_URL = "/api";
+const LANGUAGE = "tr";
 
 export class ApiError extends Error {}
 
@@ -10,6 +11,7 @@ export async function uploadLabReport(file: File, sex: Sex, age: number): Promis
   form.set("file", file);
   form.set("sex", sex);
   form.set("age", String(age));
+  form.set("language", LANGUAGE);
 
   const response = await request("/lab-reports", { method: "POST", body: form });
   return (await response.json()) as LabReport;
@@ -32,6 +34,7 @@ export async function streamExplanation(
     body: JSON.stringify({
       sex: report.sex,
       age: report.age,
+      language: LANGUAGE,
       results: report.results.map(({ analyte, value, low, high }) => ({ analyte, value, low, high })),
     }),
   });

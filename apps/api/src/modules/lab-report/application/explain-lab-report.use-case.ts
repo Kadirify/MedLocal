@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { TextGenerator } from '../../../shared/llm/text-generator.js';
+import type { Language } from '../domain/language.js';
 import { LabReport } from '../domain/lab-report.js';
 import { ExplanationPrompt } from './explanation-prompt.js';
 
@@ -18,7 +19,7 @@ export class ExplainLabReport {
     return `${this.generator.model} (prompt v${this.prompt.version})`;
   }
 
-  execute(report: LabReport, signal?: AbortSignal): AsyncIterable<string> {
+  execute(report: LabReport, language: Language, signal?: AbortSignal): AsyncIterable<string> {
     if (report.results.length === 0) {
       throw new NothingToExplainError('the report has no recognised results');
     }
@@ -27,6 +28,6 @@ export class ExplainLabReport {
       const names = report.criticalResults.map((result) => result.analyte.name).join(', ');
       throw new CriticalValueError(`critical values present: ${names}`);
     }
-    return this.generator.stream(this.prompt.messagesFor(report), signal);
+    return this.generator.stream(this.prompt.messagesFor(report, language), signal);
   }
 }

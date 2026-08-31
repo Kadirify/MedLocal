@@ -10,6 +10,7 @@ const rangeSchema = z.object({ low: bound, high: bound });
 
 const analyteSchema = z.object({
   name: z.string(),
+  name_tr: z.string(),
   unit: z.string(),
   decimals: z.number().int().nonnegative(),
   aliases: z.array(z.string()).default([]),
@@ -37,6 +38,7 @@ export class YamlAnalyteCatalog extends AnalyteCatalog {
       const analyte = new Analyte(
         key,
         entry.name,
+        entry.name_tr,
         entry.unit,
         entry.decimals,
         {
@@ -47,7 +49,7 @@ export class YamlAnalyteCatalog extends AnalyteCatalog {
         entry.critical ?? { low: null, high: null },
       );
       this.byKey.set(key, analyte);
-      for (const label of [entry.name, ...entry.aliases]) {
+      for (const label of [entry.name, entry.name_tr, ...entry.aliases]) {
         this.byLabel.set(normalize(label), analyte);
       }
     }

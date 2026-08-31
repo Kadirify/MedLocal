@@ -59,7 +59,7 @@ export class LabReportController {
       return {
         sex: report.sex,
         age: report.age,
-        results: toResultViews(report),
+        results: toResultViews(report, patient.language),
         unrecognizedLabels,
         differentUnitLabels,
         criticalMessage: report.criticalResults.length > 0 ? CRITICAL_VALUE_MESSAGE : null,
@@ -88,7 +88,7 @@ export class LabReportController {
 
     let pieces: AsyncIterable<string>;
     try {
-      pieces = this.explainLabReport.execute(report, aborted.signal);
+      pieces = this.explainLabReport.execute(report, body.language, aborted.signal);
     } catch (error) {
       if (error instanceof CriticalValueError) {
         throw new UnprocessableEntityException(CRITICAL_VALUE_MESSAGE);

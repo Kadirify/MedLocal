@@ -4,6 +4,8 @@ from medlocal_training.data.chat_format import ChatMessage
 from medlocal_training.labs.analyte import Language, ReferenceRange, Sex
 from medlocal_training.labs.report import Flag, LabReport, LabResult
 
+_RESULT_LINE = "- {name}: {value} {unit} ({reference} {range}) {flag}"
+
 
 @dataclass(frozen=True)
 class _Wording:
@@ -83,6 +85,21 @@ def explainer_system(language: Language) -> str:
     return _WORDING[language].system
 
 
+def rendering_templates(language: Language) -> dict[str, object]:
+    """Everything another implementation needs to render a report exactly as this module does."""
+    wording = _WORDING[language]
+    return {
+        "patient": wording.patient,
+        "sexes": {sex.value: text for sex, text in wording.sexes.items()},
+        "flags": {flag.value: text for flag, text in wording.flags.items()},
+        "result": _RESULT_LINE,
+        "reference": wording.reference,
+        "up_to": wording.up_to,
+        "at_least": wording.at_least,
+        "between": wording.between,
+    }
+
+
 def flag_tokens(language: Language) -> tuple[str, ...]:
     return tuple(_WORDING[language].flags.values())
 
@@ -122,9 +139,14 @@ def _render(result: LabResult, language: Language) -> str:
     analyte = result.analyte
     value = f"{result.value:.{analyte.decimals}f}"
     reference = _describe(result.reference, analyte.decimals, wording)
-    name = analyte.display_name(language)
-    flag = wording.flags[result.flag]
-    return f"- {name}: {value} {analyte.unit} ({wording.reference} {reference}) {flag}"
+    return _RESULT_LINE.format(
+        name=analyte.display_name(language),
+        value=value,
+        unit=analyte.unit,
+        reference=wording.reference,
+        range=reference,
+        flag=wording.flags[result.flag],
+    )
 
 
 def _describe(reference: ReferenceRange, decimals: int, wording: _Wording) -> str:

@@ -1,3 +1,4 @@
+import type { Language } from './language.js';
 import { ReferenceRange } from './reference-range.js';
 
 export type Sex = 'male' | 'female';
@@ -11,11 +12,16 @@ export class Analyte {
   constructor(
     readonly key: string,
     readonly name: string,
+    readonly nameTr: string,
     readonly unit: string,
     readonly decimals: number,
     private readonly ranges: Readonly<Partial<Record<Sex | 'any', ReferenceRange>>>,
     readonly critical: CriticalLimits,
   ) {}
+
+  nameIn(language: Language): string {
+    return language === 'tr' ? this.nameTr : this.name;
+  }
 
   rangeFor(sex: Sex): ReferenceRange {
     const range = this.ranges.any ?? this.ranges[sex];
