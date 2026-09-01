@@ -169,3 +169,37 @@ def test_a_plural_still_names_the_analyte() -> None:
     text = GOOD.replace("Ferritin", "Platelets").replace("ferritin", "platelets")
 
     assert "mentions_flagged" not in failed_checks(report, text, EN)
+
+
+def test_flags_a_verdict_on_overall_health() -> None:
+    text = GOOD + " Your overall health looks fine."
+
+    assert failed_checks(LOW_FERRITIN, text, EN) == ["no_health_verdict"]
+
+
+def test_flags_a_turkish_verdict_on_overall_health() -> None:
+    text = IYI + " Genel sağlık durumunuz iyi görünüyor."
+
+    assert failed_checks(LOW_FERRITIN, text, TR) == ["no_health_verdict"]
+
+
+def test_flags_a_condition_the_catalog_does_not_name_for_this_result() -> None:
+    report = _report(tsh=0.1, vitamin_b12=400)
+    text = GOOD.replace("Ferritin", "TSH").replace("ferritin", "TSH") + (
+        " This is usually linked to hyperthyroidism."
+    )
+
+    assert failed_checks(report, text, EN) == ["no_unlisted_condition"]
+
+
+def test_allows_a_condition_the_catalog_names_for_this_result() -> None:
+    report = _report(glucose_fasting=118, vitamin_b12=400)
+    text = (
+        "One result is higher than expected. Fasting glucose shows the sugar in your blood "
+        "after not eating. Your glucose is high, which can be seen when a sample was not truly "
+        "fasting, during stress or illness, or with prediabetes or diabetes. Your vitamin B12 "
+        "is within the normal range. Please discuss these results with your doctor, who can "
+        "look at them together with your health history."
+    )
+
+    assert failed_checks(report, text, EN) == []

@@ -23,6 +23,11 @@ class _Patterns:
     medication_advice: re.Pattern[str]
     direction: dict[Flag, re.Pattern[str]]
     normal: re.Pattern[str]
+    # a handful of lab values says nothing about a person's health as a whole
+    health_verdict: re.Pattern[str]
+    # conditions an explanation may only name when the catalog's own context for a flagged
+    # result names them; group 1 is the stem looked up in that context
+    condition: re.Pattern[str]
     # Turkish is agglutinative: "hemoglobininiz" still names hemoglobin
     names_take_suffixes: bool
 
@@ -50,6 +55,17 @@ _PATTERNS = {
             Flag.HIGH: re.compile(r"\b(high|higher|above|elevated|raised|increased|over)\b", re.I),
         },
         normal=re.compile(r"\b(normal|within|expected range|in range)\b", re.I),
+        health_verdict=re.compile(
+            r"\b(overall|general) health\b|\byou are (perfectly |completely )?healthy\b"
+            r"|\bnothing to worry\b|\bno (cause|reason) for concern\b|\bgood health\b",
+            re.I,
+        ),
+        condition=re.compile(
+            r"\b(hyperthyroid|hypothyroid|anemi|anaemi|diabet|leukemi|leukaemi|lymphoma|cancer"
+            r"|tumou?r|cirrhos|hepatit|kidney failure|renal failure|gout|lupus|arthritis"
+            r"|heart attack|heart disease|stroke)\w*",
+            re.I,
+        ),
         names_take_suffixes=False,
     ),
     Language.TURKISH: _Patterns(
@@ -72,6 +88,16 @@ _PATTERNS = {
             Flag.HIGH: re.compile(r"\b(yükse\w*|üstünde\w*|üzerinde\w*|artmış\w*)\b", re.I),
         },
         normal=re.compile(r"\b(normal\w*|aralı\w+ içinde\w*|aralığında\w*)\b", re.I),
+        health_verdict=re.compile(
+            r"\bgenel sağlı\w*|\bsağlıklısınız\b|\bsağlığınız (iyi|yerinde)\b"
+            r"|\bendişe\w* (gerek|bir şey) yok\b|\bendişelenme\w* gerek yok\b",
+            re.I,
+        ),
+        condition=re.compile(
+            r"\b(hipertiroid|hipotiroid|anemi|kansızlı|diyabet|lösemi|lenfoma|kanser|tümör"
+            r"|siroz|hepatit|böbrek yetmezli|gut|lupus|romatizma|kalp krizi|kalp hastalı|inme)\w*",
+            re.I,
+        ),
         names_take_suffixes=True,
     ),
 }
@@ -106,6 +132,21 @@ def _makes_no_diagnosis(_: LabReport, text: str, language: Language) -> bool:
 
 def _gives_no_medication_advice(_: LabReport, text: str, language: Language) -> bool:
     return _PATTERNS[language].medication_advice.search(text) is None
+
+
+def _passes_no_verdict_on_health(_: LabReport, text: str, language: Language) -> bool:
+    return _PATTERNS[language].health_verdict.search(text) is None
+
+
+def _names_only_conditions_from_the_catalog(
+    report: LabReport, text: str, language: Language
+) -> bool:
+    allowed = " ".join(
+        result.analyte.context("low" if result.flag is Flag.LOW else "high", language)
+        for result in report.flagged()
+    ).lower()
+    named = _PATTERNS[language].condition.finditer(text)
+    return all(match.group(1).lower() in allowed for match in named)
 
 
 def _mentions_every_flagged_result(report: LabReport, text: str, language: Language) -> bool:
@@ -206,6 +247,8 @@ _CHECKS: dict[str, Check] = {
     "doctor_referral": _refers_to_a_doctor,
     "no_diagnosis": _makes_no_diagnosis,
     "no_medication_advice": _gives_no_medication_advice,
+    "no_health_verdict": _passes_no_verdict_on_health,
+    "no_unlisted_condition": _names_only_conditions_from_the_catalog,
     "mentions_flagged": _mentions_every_flagged_result,
     "direction": _keeps_the_given_direction,
     "no_false_alarm": _raises_no_false_alarm,

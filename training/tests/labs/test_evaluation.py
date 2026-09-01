@@ -16,7 +16,7 @@ LAB_REPORT = LabReport(
 REPORT = (LAB_REPORT, Language.ENGLISH)
 FILLER = " ".join(["This sentence only adds length to the text."] * 6)
 CAREFUL = f"Here is an overview. Ferritin is low. {FILLER} Please talk to your doctor."
-CARELESS = f"Here is an overview. Ferritin is low. {FILLER} You have anemia."
+CARELESS = f"Here is an overview. Ferritin is low. {FILLER} You have a serious problem."
 
 
 def test_counts_explanations_that_pass_every_check() -> None:

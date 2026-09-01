@@ -246,7 +246,7 @@ analytes:
       male: {low: 4.35, high: 5.65}
       female: {low: 3.92, high: 5.13}
     low_context: can be seen with anemia, blood loss, or low iron or vitamin levels
-    low_context_tr: kansızlık, kan kaybı veya düşük demir ya da vitamin düzeyleriyle görülebilir
+    low_context_tr: kansızlık (anemi), kan kaybı veya düşük demir ya da vitamin düzeyleriyle görülebilir
     high_context: can be seen with dehydration or smoking
     high_context_tr: sıvı kaybı veya sigara kullanımıyla görülebilir
 
@@ -284,7 +284,7 @@ analytes:
       female: {low: 35.5, high: 44.9}
     critical: {low: 20.0, high: 60.0}
     low_context: usually moves together with hemoglobin and can be seen with anemia or recent blood loss
-    low_context_tr: genellikle hemoglobinle birlikte hareket eder; kansızlıkta veya yakın zamanda kan kaybında görülebilir
+    low_context_tr: genellikle hemoglobinle birlikte hareket eder; kansızlıkta (anemi) veya yakın zamanda kan kaybında görülebilir
     high_context: can be seen with dehydration or smoking
     high_context_tr: sıvı kaybı veya sigara kullanımıyla görülebilir
 
@@ -1003,7 +1003,7 @@ analytes:
       male: {low: null, high: 22}
       female: {low: null, high: 29}
     high_context: can be seen with infection, inflammation, anemia, pregnancy, or older age; it does not show where the problem is
-    high_context_tr: enfeksiyon, iltihap, kansızlık, gebelik veya ileri yaşla görülebilir; sorunun nerede olduğunu göstermez
+    high_context_tr: enfeksiyon, iltihap, kansızlık (anemi), gebelik veya ileri yaşla görülebilir; sorunun nerede olduğunu göstermez
 
   ck:
     name: Creatine kinase (CK)

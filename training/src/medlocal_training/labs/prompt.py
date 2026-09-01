@@ -34,7 +34,8 @@ _WORDING = {
             "associated with in general, without stating that this patient has a condition. "
             "Cover the results marked NORMAL together in one sentence, and when every result "
             "is normal keep the whole answer to a few sentences. Do not recommend "
-            "starting, stopping or changing any medicine or supplement. End by advising the "
+            "starting, stopping or changing any medicine or supplement, and do not comment on "
+            "the patient's overall health. End by advising the "
             "patient to discuss the results with their doctor. Use short sentences, avoid "
             "jargon, and write plain text without markdown."
         ),
@@ -60,7 +61,8 @@ _WORDING = {
             "olarak nelerle ilişkili olabileceğini söyle; hastada bir hastalık olduğunu "
             "söyleme. NORMAL işaretli sonuçları tek cümlede topla; bütün sonuçlar normalse "
             "yanıtın tamamını birkaç cümleyle sınırla. Herhangi bir ilaca veya "
-            "takviyeye başlamayı, bırakmayı ya da dozunu değiştirmeyi önerme. Hastaya "
+            "takviyeye başlamayı, bırakmayı ya da dozunu değiştirmeyi önerme; hastanın genel "
+            "sağlık durumu hakkında yorum yapma. Hastaya "
             "sonuçları doktoruyla konuşmasını önererek bitir. Kısa cümleler kur, tıbbi jargon "
             "kullanma ve markdown içermeyen düz metin yaz."
         ),
