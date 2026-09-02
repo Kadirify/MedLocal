@@ -203,3 +203,30 @@ def test_allows_a_condition_the_catalog_names_for_this_result() -> None:
     )
 
     assert failed_checks(report, text, EN) == []
+
+
+ALL_NORMAL = _report(ferritin=80, vitamin_b12=400)
+
+
+def test_flags_reassurance_about_being_healthy() -> None:
+    text = IYI.replace(
+        "Ferritininiz düşük çıkmış", "Ferritininiz düşük çıkmış ama sağlıklı olduğunuz görülüyor"
+    )
+
+    assert failed_checks(LOW_FERRITIN, text, TR) == ["no_health_verdict"]
+
+
+def test_flags_a_claim_that_a_disease_is_absent() -> None:
+    text = GOOD + " There is no sign of inflammation."
+
+    assert failed_checks(LOW_FERRITIN, text, EN) == ["no_health_verdict"]
+
+
+def test_a_report_without_flags_gets_a_short_answer() -> None:
+    short = (
+        "All of your results are within their reference ranges. Ferritin and vitamin B12 "
+        "are both normal. Please go over them with your doctor."
+    )
+
+    assert failed_checks(ALL_NORMAL, short, EN) == []
+    assert failed_checks(ALL_NORMAL, " ".join([short] * 5), EN) == ["length"]

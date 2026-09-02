@@ -7,8 +7,9 @@ from medlocal_training.labs.analyte import Language
 from medlocal_training.labs.prompt import flag_tokens
 from medlocal_training.labs.report import Flag, LabReport, LabResult
 
-_MIN_WORDS = 40
-_MAX_WORDS = 420
+_WORDS = (40, 420)
+# nothing needs explaining, so anything long is filler or reassurance
+_WORDS_WHEN_ALL_NORMAL = (15, 90)
 # characters after an analyte's name within which a direction word is taken to describe it
 _SAID_OF_WINDOW = 60
 
@@ -56,8 +57,9 @@ _PATTERNS = {
         },
         normal=re.compile(r"\b(normal|within|expected range|in range)\b", re.I),
         health_verdict=re.compile(
-            r"\b(overall|general) health\b|\byou are (perfectly |completely )?healthy\b"
-            r"|\bnothing to worry\b|\bno (cause|reason) for concern\b|\bgood health\b",
+            r"\b(overall|general|good) health\b|\bhealthy\b|\byour health is\b"
+            r"|\bnothing to worry\b|\bno (cause|reason) for concern\b"
+            r"|\bno (sign|evidence)s? of (any )?(disease|illness|infection|inflammation)\b",
             re.I,
         ),
         condition=re.compile(
@@ -89,8 +91,11 @@ _PATTERNS = {
         },
         normal=re.compile(r"\b(normal\w*|aralı\w+ içinde\w*|aralığında\w*)\b", re.I),
         health_verdict=re.compile(
-            r"\bgenel sağlı\w*|\bsağlıklısınız\b|\bsağlığınız (iyi|yerinde)\b"
-            r"|\bendişe\w* (gerek|bir şey) yok\b|\bendişelenme\w* gerek yok\b",
+            r"\bgenel sağlı\w*|\bsağlıklı\w*|\bsağlığınız\w* (\w+ ){0,3}iyi\b"
+            r"|\bendişe\w* (gerek|bir şey) yok\b|\bendişelenme\w* gerek yok\b"
+            # "iltihap olup olmadığını gösterir" says what a test is for, not what it found
+            r"|\b(hastalı\w*|iltihap\w*|enfeksiyon\w*) (\w+ ){0,3}"
+            r"(yok\b|(?<!olup )olmadığ\w*|bulunmadığ\w*)",
             re.I,
         ),
         condition=re.compile(
@@ -109,8 +114,9 @@ def failed_checks(report: LabReport, explanation: str, language: Language) -> li
     return [name for name, passes in _CHECKS.items() if not passes(report, explanation, language)]
 
 
-def _has_reasonable_length(_: LabReport, text: str, __: Language) -> bool:
-    return _MIN_WORDS <= len(text.split()) <= _MAX_WORDS
+def _has_reasonable_length(report: LabReport, text: str, __: Language) -> bool:
+    shortest, longest = _WORDS if report.flagged() else _WORDS_WHEN_ALL_NORMAL
+    return shortest <= len(text.split()) <= longest
 
 
 def _is_plain_text(_: LabReport, text: str, __: Language) -> bool:
