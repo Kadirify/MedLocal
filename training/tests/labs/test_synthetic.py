@@ -79,11 +79,13 @@ def test_a_full_panel_is_never_combined_with_its_short_version() -> None:
 
 
 @pytest.mark.parametrize("language", list(Language))
-def test_rendering_prints_one_line_per_result(language: Language) -> None:
+def test_rendering_prints_every_result_and_a_note_for_each_flagged_one(
+    language: Language,
+) -> None:
     report = _reports(7, 1)[0]
     text = render_report(report, language)
 
-    assert text.count("\n- ") == len(report.results)
+    assert text.count("\n- ") == len(report.results) + len(report.flagged())
     for result in report.results:
         assert f"- {result.analyte.display_name(language)}: " in text
 

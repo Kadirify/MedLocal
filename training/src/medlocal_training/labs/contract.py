@@ -5,7 +5,7 @@ from medlocal_training.labs.analyte import AnalyteCatalog, Language, Sex
 from medlocal_training.labs.prompt import explainer_system, render_report, rendering_templates
 from medlocal_training.labs.report import LabReport, LabResult
 
-_VERSION = 2
+_VERSION = 3
 
 # one result of every rendering kind: two-sided, upper-only and lower-only ranges, each flag,
 # sex-specific ranges and the different numbers of decimals

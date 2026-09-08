@@ -342,7 +342,7 @@ analytes:
   rdw_cv:
     name: RDW
     name_tr: RDW (eritrosit dağılım genişliği)
-    aliases: [rdw-cv, rdw cv, eritrosit dağılım aralığı, eritrosit dağılım genişliği]
+    aliases: [rdw-cv, rdw cv, rdw]
     mentions: [RDW]
     mentions_tr: [RDW]
     unit: "%"

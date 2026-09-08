@@ -1,5 +1,5 @@
 {
-  "version": 2,
+  "version": 3,
   "example": {
     "sex": "female",
     "age": 34,
@@ -52,9 +52,15 @@
         "reference": "reference",
         "up_to": "up to {high}",
         "at_least": "{low} or higher",
-        "between": "{low} to {high}"
+        "between": "{low} to {high}",
+        "background_header": "Background you may rely on (do not quote it):",
+        "background_line": "- {name} measures {measures}. A {side} result {context}.",
+        "sides": {
+          "LOW": "low",
+          "HIGH": "high"
+        }
       },
-      "user": "Patient: female, 34 years old\nResults:\n- Hemoglobin: 10.8 g/dL (reference 11.6 to 15.0) LOW\n- MCV: 74.0 fL (reference 80.0 to 100.0) LOW\n- White blood cells: 6.21 10^3/µL (reference 3.40 to 9.60) NORMAL\n- Ferritin: 8 ng/mL (reference 11 to 307) LOW\n- HDL cholesterol: 62 mg/dL (reference 50 or higher) NORMAL\n- LDL cholesterol: 131 mg/dL (reference up to 99) HIGH\n- TSH: 2.10 mIU/L (reference 0.30 to 4.20) NORMAL"
+      "user": "Patient: female, 34 years old\nResults:\n- Hemoglobin: 10.8 g/dL (reference 11.6 to 15.0) LOW\n- MCV: 74.0 fL (reference 80.0 to 100.0) LOW\n- White blood cells: 6.21 10^3/µL (reference 3.40 to 9.60) NORMAL\n- Ferritin: 8 ng/mL (reference 11 to 307) LOW\n- HDL cholesterol: 62 mg/dL (reference 50 or higher) NORMAL\n- LDL cholesterol: 131 mg/dL (reference up to 99) HIGH\n- TSH: 2.10 mIU/L (reference 0.30 to 4.20) NORMAL\n\nBackground you may rely on (do not quote it):\n- Hemoglobin measures the protein in red blood cells that carries oxygen around the body. A low result can be seen with low iron, vitamin B12 or folate, blood loss, or long-term health conditions.\n- MCV measures the average size of red blood cells. A low result smaller red blood cells can be seen with low iron.\n- Ferritin measures the amount of iron stored in the body. A low result points to low iron stores, which can come from diet, heavy periods, or blood loss.\n- LDL cholesterol measures the cholesterol that can build up in artery walls. A high result can be related to diet, body weight, physical activity, or family history; what counts as a good level depends on a person's overall heart risk."
     },
     "tr": {
       "system": "Laboratuvar sonuçlarını hastalara sade bir Türkçeyle açıklıyorsun; hastaya doğrudan ve \"siz\" diye hitap et. Aşağıdaki her sonuç referans aralığıyla zaten karşılaştırıldı; bir değeri asla yeniden değerlendirme. Tek cümlelik bir genel özetle başla. DÜŞÜK veya YÜKSEK işaretli her sonuç için testin neyi ölçtüğünü ve o yöndeki bir sonucun genel olarak nelerle ilişkili olabileceğini söyle; hastada bir hastalık olduğunu söyleme. NORMAL işaretli sonuçları tek cümlede topla; bütün sonuçlar normalse yanıtın tamamını birkaç cümleyle sınırla. Herhangi bir ilaca veya takviyeye başlamayı, bırakmayı ya da dozunu değiştirmeyi önerme; hastanın genel sağlık durumu hakkında yorum yapma. Hastaya sonuçları doktoruyla konuşmasını önererek bitir. Kısa cümleler kur, tıbbi jargon kullanma ve markdown içermeyen düz metin yaz.",
@@ -73,9 +79,15 @@
         "reference": "referans",
         "up_to": "en fazla {high}",
         "at_least": "en az {low}",
-        "between": "{low} - {high}"
+        "between": "{low} - {high}",
+        "background_header": "Güvenebileceğin arka plan bilgisi (alıntılama):",
+        "background_line": "- {name}, {measures} ölçer. {side} bir sonuç {context}.",
+        "sides": {
+          "LOW": "Düşük",
+          "HIGH": "Yüksek"
+        }
       },
-      "user": "Hasta: kadın, 34 yaşında\nSonuçlar:\n- Hemoglobin (HGB): 10.8 g/dL (referans 11.6 - 15.0) DÜŞÜK\n- MCV (ortalama eritrosit hacmi): 74.0 fL (referans 80.0 - 100.0) DÜŞÜK\n- Lökosit (WBC): 6.21 10^3/µL (referans 3.40 - 9.60) NORMAL\n- Ferritin: 8 ng/mL (referans 11 - 307) DÜŞÜK\n- HDL kolesterol: 62 mg/dL (referans en az 50) NORMAL\n- LDL kolesterol: 131 mg/dL (referans en fazla 99) YÜKSEK\n- TSH: 2.10 mIU/L (referans 0.30 - 4.20) NORMAL"
+      "user": "Hasta: kadın, 34 yaşında\nSonuçlar:\n- Hemoglobin (HGB): 10.8 g/dL (referans 11.6 - 15.0) DÜŞÜK\n- MCV (ortalama eritrosit hacmi): 74.0 fL (referans 80.0 - 100.0) DÜŞÜK\n- Lökosit (WBC): 6.21 10^3/µL (referans 3.40 - 9.60) NORMAL\n- Ferritin: 8 ng/mL (referans 11 - 307) DÜŞÜK\n- HDL kolesterol: 62 mg/dL (referans en az 50) NORMAL\n- LDL kolesterol: 131 mg/dL (referans en fazla 99) YÜKSEK\n- TSH: 2.10 mIU/L (referans 0.30 - 4.20) NORMAL\n\nGüvenebileceğin arka plan bilgisi (alıntılama):\n- Hemoglobin (HGB), alyuvarların içinde bulunan ve vücuda oksijen taşıyan proteini ölçer. Düşük bir sonuç demir, B12 vitamini veya folat eksikliğinde, kan kaybında ya da uzun süreli sağlık sorunlarında görülebilir.\n- MCV (ortalama eritrosit hacmi), alyuvarların ortalama büyüklüğünü ölçer. Düşük bir sonuç küçük alyuvarlar demir eksikliğinde görülebilir.\n- Ferritin, vücutta depolanan demir miktarını ölçer. Düşük bir sonuç demir depolarının azaldığını gösterir; bu beslenmeden, yoğun adet kanamalarından veya kan kaybından kaynaklanabilir.\n- LDL kolesterol, damar duvarlarında birikebilen kolesterolü ölçer. Yüksek bir sonuç beslenme, kilo, fiziksel aktivite veya aile öyküsüyle ilişkili olabilir; hangi düzeyin iyi sayılacağı kişinin genel kalp riskine bağlıdır."
     }
   }
 }

@@ -99,6 +99,9 @@ def rendering_templates(language: Language) -> dict[str, object]:
         "up_to": wording.up_to,
         "at_least": wording.at_least,
         "between": wording.between,
+        "background_header": wording.background_header,
+        "background_line": wording.background_line,
+        "sides": {flag.value: text for flag, text in wording.sides.items()},
     }
 
 
@@ -114,15 +117,9 @@ def to_explanation_messages(report: LabReport, language: Language) -> list[ChatM
 
 
 def to_teacher_messages(report: LabReport, language: Language) -> list[ChatMessage]:
-    """Same task, plus vetted background so the teacher does not write from memory alone."""
+    """The explainer's own prompt plus a reminder about style that only the teacher needs."""
     wording = _WORDING[language]
-    user = render_report(report, language)
-
-    notes = [_background(result, language) for result in report.flagged()]
-    if notes:
-        user += f"\n\n{wording.background_header}\n" + "\n".join(notes)
-    user += f"\n\n{wording.style_reminder}"
-
+    user = f"{render_report(report, language)}\n\n{wording.style_reminder}"
     return [
         {"role": "system", "content": wording.system},
         {"role": "user", "content": user},
@@ -130,10 +127,20 @@ def to_teacher_messages(report: LabReport, language: Language) -> list[ChatMessa
 
 
 def render_report(report: LabReport, language: Language) -> str:
+    """Results followed by the catalog's vetted background for every flagged one.
+
+    The explainer gets the background at inference time as well. A model that has to recall
+    what a low PDW means will sometimes recall the opposite; one that reads it does not have to.
+    """
     wording = _WORDING[language]
     header = wording.patient.format(sex=wording.sexes[report.sex], age=report.age)
     lines = [_render(result, language) for result in report.results]
-    return header + "\n" + "\n".join(lines)
+    text = header + "\n" + "\n".join(lines)
+
+    notes = [_background(result, language) for result in report.flagged()]
+    if notes:
+        text += f"\n\n{wording.background_header}\n" + "\n".join(notes)
+    return text
 
 
 def _render(result: LabResult, language: Language) -> str:

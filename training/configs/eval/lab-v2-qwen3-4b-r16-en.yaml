@@ -1,0 +1,10 @@
+name: lab-v2-qwen3-4b-r16-en
+explainer: causal-lm
+model_id: unsloth/Qwen3-4B-Instruct-2507-bnb-4bit
+adapter_dir: runs/2026-09-19-lab-v2-qwen3-4b-r16/adapter
+examples_file: ../data/synthetic/lab-explanations.jsonl
+catalog_file: ../reference/analytes.yaml
+split: test
+language: en
+batch_size: 8
+max_new_tokens: 700

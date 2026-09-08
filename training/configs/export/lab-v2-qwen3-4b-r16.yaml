@@ -1,6 +1,6 @@
 name: medlocal-lab
 base_model_id: Qwen/Qwen3-4B-Instruct-2507
-adapter_dir: runs/2026-09-19-lab-qwen3-4b-r16/adapter
+adapter_dir: runs/2026-09-19-lab-v2-qwen3-4b-r16/adapter
 llama_cpp_dir: ../tools/llama.cpp
 output_dir: ../models/medlocal-lab
 outtype: q8_0
