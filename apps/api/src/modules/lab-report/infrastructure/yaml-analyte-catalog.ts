@@ -11,6 +11,12 @@ const rangeSchema = z.object({ low: bound, high: bound });
 const analyteSchema = z.object({
   name: z.string(),
   name_tr: z.string(),
+  measures: z.string(),
+  measures_tr: z.string(),
+  low_context: z.string().optional(),
+  low_context_tr: z.string().optional(),
+  high_context: z.string().optional(),
+  high_context_tr: z.string().optional(),
   unit: z.string(),
   decimals: z.number().int().nonnegative(),
   aliases: z.array(z.string()).default([]),
@@ -47,6 +53,11 @@ export class YamlAnalyteCatalog extends AnalyteCatalog {
           female: toRange(entry.ranges.female),
         },
         entry.critical ?? { low: null, high: null },
+        {
+          measures: { en: entry.measures, tr: entry.measures_tr },
+          low: translated(entry.low_context, entry.low_context_tr),
+          high: translated(entry.high_context, entry.high_context_tr),
+        },
       );
       this.byKey.set(key, analyte);
       for (const label of [entry.name, entry.name_tr, ...entry.aliases]) {
@@ -66,6 +77,10 @@ export class YamlAnalyteCatalog extends AnalyteCatalog {
     }
     return undefined;
   }
+}
+
+function translated(en?: string, tr?: string): { en: string; tr: string } | null {
+  return en !== undefined && tr !== undefined ? { en, tr } : null;
 }
 
 function toRange(input: RangeInput): ReferenceRange | undefined {

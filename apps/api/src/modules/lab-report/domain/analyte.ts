@@ -3,6 +3,15 @@ import { ReferenceRange } from './reference-range.js';
 
 export type Sex = 'male' | 'female';
 
+type Translated = Readonly<Record<Language, string>>;
+
+/** Vetted text the explainer is given for a flagged result, so that it never has to recall it. */
+export interface AnalyteBackground {
+  readonly measures: Translated;
+  readonly low: Translated | null;
+  readonly high: Translated | null;
+}
+
 export interface CriticalLimits {
   readonly low: number | null;
   readonly high: number | null;
@@ -17,6 +26,7 @@ export class Analyte {
     readonly decimals: number,
     private readonly ranges: Readonly<Partial<Record<Sex | 'any', ReferenceRange>>>,
     readonly critical: CriticalLimits,
+    readonly background: AnalyteBackground,
   ) {}
 
   nameIn(language: Language): string {

@@ -13,6 +13,9 @@ const wording = z.object({
     up_to: z.string(),
     at_least: z.string(),
     between: z.string(),
+    background_header: z.string(),
+    background_line: z.string(),
+    sides: z.object({ LOW: z.string(), HIGH: z.string() }),
   }),
 });
 

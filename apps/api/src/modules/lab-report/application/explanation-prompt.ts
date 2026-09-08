@@ -15,6 +15,9 @@ export interface PromptWording {
     readonly up_to: string;
     readonly at_least: string;
     readonly between: string;
+    readonly background_header: string;
+    readonly background_line: string;
+    readonly sides: Readonly<Record<'LOW' | 'HIGH', string>>;
   };
 }
 
@@ -44,7 +47,10 @@ export class ExplanationPrompt {
       age: String(report.age),
     });
     const lines = report.results.map((result) => this.renderResult(result, language));
-    return [header, ...lines].join('\n');
+    const notes = report.results.flatMap((result) => this.renderBackground(result, language));
+    const results = [header, ...lines].join('\n');
+    if (notes.length === 0) return results;
+    return [results, '', templates.background_header, ...notes].join('\n');
   }
 
   private renderResult(result: LabResult, language: Language): string {
@@ -58,6 +64,23 @@ export class ExplanationPrompt {
       range: this.describe(result.reference, analyte.decimals, language),
       flag: templates.flags[result.flag],
     });
+  }
+
+  private renderBackground(result: LabResult, language: Language): string[] {
+    const { flag, analyte } = result;
+    if (flag === 'NORMAL') return [];
+
+    const { templates } = this.wording[language];
+    const context = flag === 'LOW' ? analyte.background.low : analyte.background.high;
+    if (!context) throw new Error(`${analyte.key} has no ${flag} background`);
+    return [
+      fill(templates.background_line, {
+        name: analyte.nameIn(language),
+        measures: analyte.background.measures[language],
+        side: templates.sides[flag],
+        context: context[language],
+      }),
+    ];
   }
 
   private describe(range: ReferenceRange, decimals: number, language: Language): string {

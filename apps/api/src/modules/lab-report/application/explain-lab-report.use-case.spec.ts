@@ -29,6 +29,9 @@ const templates: PromptWording['templates'] = {
   up_to: 'up to {high}',
   at_least: '{low} or higher',
   between: '{low} to {high}',
+  background_header: 'Background:',
+  background_line: '- {name} measures {measures}. A {side} result {context}.',
+  sides: { LOW: 'low', HIGH: 'high' },
 };
 const prompt = new ExplanationPrompt(1, {
   en: { system: 'system text', templates },
@@ -45,6 +48,11 @@ const potassium = new Analyte(
   1,
   { any: range },
   critical,
+  {
+    measures: { en: 'a mineral', tr: 'bir minerali' },
+    low: { en: 'can be seen with vomiting', tr: 'kusmayla görülebilir' },
+    high: { en: 'can be seen with some medicines', tr: 'bazı ilaçlarla görülebilir' },
+  },
 );
 const reportWith = (value: number) =>
   new LabReport('female', 40, [new LabResult(potassium, value, range)]);
@@ -60,6 +68,28 @@ describe('ExplainLabReport', () => {
     expect(pieces.join('')).toBe('Your potassium is low.');
     expect(generator.received[0]).toEqual({ role: 'system', content: 'system text' });
     expect(generator.received[1]?.content).toContain('- Potassium: 3.2 mmol/L');
+  });
+
+  it('hands the model the vetted background of every flagged result', async () => {
+    const generator = new RecordingGenerator();
+    const useCase = new ExplainLabReport(generator, prompt);
+
+    const pieces: string[] = [];
+    for await (const piece of useCase.execute(reportWith(3.2), 'en')) pieces.push(piece);
+
+    expect(generator.received[1]?.content).toContain(
+      'Background:\n- Potassium measures a mineral. A low result can be seen with vomiting.',
+    );
+  });
+
+  it('adds no background when nothing is flagged', async () => {
+    const generator = new RecordingGenerator();
+    const useCase = new ExplainLabReport(generator, prompt);
+
+    const pieces: string[] = [];
+    for await (const piece of useCase.execute(reportWith(4.4), 'en')) pieces.push(piece);
+
+    expect(generator.received[1]?.content).not.toContain('Background:');
   });
 
   it('asks in the language of the reader', async () => {

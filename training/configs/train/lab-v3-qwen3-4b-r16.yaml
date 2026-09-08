@@ -1,0 +1,20 @@
+name: lab-v3-qwen3-4b-r16
+base_model_id: unsloth/Qwen3-4B-Instruct-2507-bnb-4bit
+data:
+  kind: lab-explanations
+  examples_file: ../data/synthetic/lab-explanations.jsonl
+  catalog_file: ../reference/analytes.yaml
+seed: 3407
+max_seq_length: 3072
+lora:
+  rank: 16
+  alpha: 16
+  dropout: 0.0
+learning_rate: 1.0e-4
+epochs: 3
+batch_size: 1
+gradient_accumulation_steps: 16
+warmup_steps: 10
+logging_steps: 10
+eval_steps: 40
+early_stopping_patience: 3
