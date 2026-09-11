@@ -20,6 +20,8 @@ _ASSISTANT_TURN = "<|im_start|>assistant\n"
 class TrainingSummary:
     adapter_dir: Path
     steps: int
+    train_examples: int
+    skipped_as_too_long: int
     final_train_loss: float
     best_validation_loss: float
 
@@ -52,14 +54,20 @@ def train_text_qlora(
         random_state=config.seed,
     )
 
-    def as_text(examples: Sequence[TrainingExample]) -> Dataset:
-        texts = [render_training_text(tokenizer, e.prompt, e.answer) for e in examples]
-        return Dataset.from_dict({"text": texts})
+    def fits(text: str) -> bool:
+        return len(tokenizer(text)["input_ids"]) <= config.max_seq_length
 
+    def as_text(examples: Sequence[TrainingExample]) -> Dataset:
+        # an example cut off at max_seq_length loses the end of its answer, which teaches the
+        # model to stop mid-sentence; leaving it out costs less
+        texts = [render_training_text(tokenizer, e.prompt, e.answer) for e in examples]
+        return Dataset.from_dict({"text": [text for text in texts if fits(text)]})
+
+    train_texts = as_text(train)
     trainer = SFTTrainer(
         model=model,
         processing_class=tokenizer,
-        train_dataset=as_text(train),
+        train_dataset=train_texts,
         eval_dataset=as_text(validation),
         args=SFTConfig(
             output_dir=str(run_dir / "checkpoints"),
@@ -106,6 +114,8 @@ def train_text_qlora(
     return TrainingSummary(
         adapter_dir=adapter_dir,
         steps=result.global_step,
+        train_examples=len(train_texts),
+        skipped_as_too_long=len(train) - len(train_texts),
         final_train_loss=result.training_loss,
         best_validation_loss=min(e["eval_loss"] for e in history if "eval_loss" in e),
     )

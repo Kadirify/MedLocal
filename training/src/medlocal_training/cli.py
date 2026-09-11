@@ -99,6 +99,7 @@ def _train_text(args: argparse.Namespace) -> int:
     summary = train_text_qlora(config, train, validation, run.path)
     run.write_metrics(summary)
     print(f"steps            {summary.steps}")
+    print(f"examples         {summary.train_examples} ({summary.skipped_as_too_long} too long)")
     print(f"train loss       {summary.final_train_loss:.4f}")
     print(f"validation loss  {summary.best_validation_loss:.4f} (best)")
     print(f"adapter          {summary.adapter_dir}")

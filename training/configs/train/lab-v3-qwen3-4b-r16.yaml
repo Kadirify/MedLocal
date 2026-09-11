@@ -5,7 +5,7 @@ data:
   examples_file: ../data/synthetic/lab-explanations.jsonl
   catalog_file: ../reference/analytes.yaml
 seed: 3407
-max_seq_length: 3072
+max_seq_length: 1792
 lora:
   rank: 16
   alpha: 16

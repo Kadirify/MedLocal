@@ -13,7 +13,8 @@ flowchart LR
     P[Lab PDF] --> R[Parse rows]
     R --> F[Flag against reference ranges]
     F -->|critical value| S[Fixed safety message]
-    F -->|otherwise| M[Fine-tuned 4B model via Ollama]
+    F -->|otherwise| B[Add catalog background for flagged results]
+    B --> M[Fine-tuned 4B model via Ollama]
     M --> E[Plain-language explanation]
 ```
 
@@ -27,24 +28,23 @@ Three rules shape the design:
 
 There is no public dataset of lab reports paired with patient-friendly explanations, so the training data is built locally:
 
-1. A generator draws realistic synthetic reports from the analyte catalog (28 analytes, 8 panels). No real patient data is used anywhere.
+1. A generator draws realistic synthetic reports from the analyte catalog (58 analytes, in English and Turkish). Values an analyser calculates from others are calculated here too, so a report never contradicts itself. No real patient data is used anywhere.
 2. A larger local teacher model (Qwen3-14B, Apache 2.0) writes an explanation for each report, grounded in vetted background text from the catalog.
-3. Every explanation must pass rule-based checks: each flagged result is mentioned, the direction is stated correctly, no diagnosis, no medication advice, a referral to a doctor, plain text, sensible length. Failures are regenerated.
+3. Every explanation must pass eleven rule-based checks. Failures are regenerated, and reports the teacher cannot get right are left out.
 4. Qwen3-4B is fine-tuned on the result with QLoRA on a single 12 GB consumer GPU, then merged, converted to GGUF and served by Ollama.
 
-The student never sees the background text the teacher was given. It has to carry that knowledge itself, which is what the fine-tuning is for.
+The model is given the catalog's vetted background for every flagged result, at training time and in the app. It restates that text in plain language; it is not asked to recall medicine from memory.
 
 ## Results so far
 
-**Lab explainer**, 149 held-out synthetic reports. An explanation passes when it satisfies every safety rule: all flagged results mentioned, correct direction, no diagnosis, no medication advice, referral to a doctor, plain text, sensible length.
+**Lab explainer**, 262 held-out synthetic reports, half of them Turkish. An explanation passes when it satisfies all eleven safety rules: every flagged result mentioned with the right direction, no diagnosis, no medication advice, no verdict on the patient's overall health, no condition the catalog does not name, no false alarm about a normal result, a referral to a doctor, plain text, sensible length.
 
-| Model | Passes every rule | States or implies a diagnosis |
+| Model | English | Turkish |
 |---|---|---|
-| Qwen3-4B, untuned | 77.9% | 16.8% |
-| Qwen3-4B + QLoRA (20 minutes on an RTX 5070) | 94.0% | 2.0% |
-| Same model as Q8_0 GGUF, served by Ollama | 94.6% | 2.0% |
+| Qwen3-4B, untuned | 63.9% | 20.0% |
+| Qwen3-4B + QLoRA (80 minutes on an RTX 5070) | 89.3% | 92.1% |
 
-These numbers measure rule compliance on synthetic data, not medical accuracy. Details and caveats: [`docs/results/lab-explainer.md`](docs/results/lab-explainer.md).
+These numbers measure rule compliance on synthetic data, not medical accuracy. An earlier version scored 95% and still told a real patient the opposite of what the catalog says about one result; what was changed because of that, and everything else the numbers do not show, is in [`docs/results/lab-explainer.md`](docs/results/lab-explainer.md).
 
 **Pipeline benchmark.** Before the product model, the same training and export path was proven on PubMedQA (official test split, 500 questions):
 
@@ -89,7 +89,7 @@ Training commands are listed in [`CONTRIBUTING.md`](CONTRIBUTING.md) and driven 
 ## Limits
 
 - The PDF reader handles reports with a text layer and one result per row. Scanned reports need OCR and are rejected.
-- Explanations are in English; the interface is in Turkish. Turkish explanations are on the roadmap.
+- Explanations are available in Turkish and English; the interface is Turkish. The Turkish text has occasional awkward phrasing inherited from the teacher model.
 - Reference ranges in the catalog are typical adult values. They differ between laboratories, which is why a range printed on the report always takes precedence.
 - The rule-based checks catch unsafe patterns, not every medical inaccuracy. Nothing here has been clinically validated.
 

@@ -80,12 +80,13 @@ Açık kalan: "maybe" sınıfı (F1 0). Ürünü etkilemediği için ertelendi.
 | Açıklamanın akarak gelmesi, kritik değer uyarısı ✔ | — |
 | Uyarı metni, model sürümü, TR/EN arayüz | her sonuç ekranında |
 
-## Faz 7 — Türkçe `[ ]`
+## Faz 7 — Türkçe `[x]`
 
 | İş | Çıktı |
 |---|---|
-| Türkçe açıklama verisi (öğretmenle, aynı kontrollerin Türkçesi) | ikinci veri seti |
-| İki dilli model ya da ayrı adaptör kararı | ADR |
+| Türkçe açıklama verisi, Türkçe kontroller ✔ | tek veri seti, yarısı Türkçe |
+| İki dilli tek model ✔ | `medlocal-lab:v3-q8_0`; sonuçlar `docs/results/lab-explainer.md` |
+| Katalog notlarının modele kullanım anında verilmesi (v3) ✔ | gerçek raporda bulunan bilgi hatası üzerine |
 
 ## Faz 8 — Paketleme ve yayın `[ ]`
 
