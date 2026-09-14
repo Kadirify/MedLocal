@@ -2,7 +2,7 @@ import {
   BadRequestException,
   Body,
   Controller,
-  ParseFilePipeBuilder,
+  PayloadTooLargeException,
   Post,
   Res,
   UnprocessableEntityException,
@@ -17,7 +17,7 @@ import {
 } from '../application/explain-lab-report.use-case.js';
 import { AnalyteCatalog, UnreadableLabReportError } from '../application/ports.js';
 import { ReadLabReport } from '../application/read-lab-report.use-case.js';
-import { CRITICAL_VALUE_MESSAGE, DISCLAIMER } from '../application/safety-messages.js';
+import { SAFETY_MESSAGES } from '../application/safety-messages.js';
 import { LabReport, LabResult } from '../domain/lab-report.js';
 import { ReferenceRange } from '../domain/reference-range.js';
 import {
@@ -41,15 +41,14 @@ export class LabReportController {
   @Post()
   @UseInterceptors(FileInterceptor('file'))
   async read(
-    @UploadedFile(
-      new ParseFilePipeBuilder()
-        .addFileTypeValidator({ fileType: 'application/pdf' })
-        .addMaxSizeValidator({ maxSize: MAX_PDF_BYTES })
-        .build(),
-    )
-    file: Express.Multer.File,
+    @UploadedFile() file: Express.Multer.File | undefined,
     @Body() patient: PatientDto,
   ): Promise<LabReportView> {
+    // Nest's file pipes answer in English before the reader's language is known
+    const messages = SAFETY_MESSAGES[patient.language];
+    if (!file) throw new BadRequestException(messages.missingFile);
+    if (file.size > MAX_PDF_BYTES) throw new PayloadTooLargeException(messages.fileTooLarge);
+
     try {
       const { report, unrecognizedLabels, differentUnitLabels } = await this.readLabReport.execute(
         file.buffer,
@@ -62,12 +61,12 @@ export class LabReportController {
         results: toResultViews(report, patient.language),
         unrecognizedLabels,
         differentUnitLabels,
-        criticalMessage: report.criticalResults.length > 0 ? CRITICAL_VALUE_MESSAGE : null,
-        disclaimer: DISCLAIMER,
+        criticalMessage: report.criticalResults.length > 0 ? messages.criticalValue : null,
+        disclaimer: messages.disclaimer,
       };
     } catch (error) {
       if (error instanceof UnreadableLabReportError) {
-        throw new UnprocessableEntityException(error.message);
+        throw new UnprocessableEntityException(messages.unreadableReport);
       }
       throw error;
     }
@@ -81,6 +80,7 @@ export class LabReportController {
       body.results.map((row) => this.toResult(row, body)),
     );
 
+    const messages = SAFETY_MESSAGES[body.language];
     const aborted = new AbortController();
     response.on('close', () => {
       aborted.abort();
@@ -91,7 +91,7 @@ export class LabReportController {
       pieces = this.explainLabReport.execute(report, body.language, aborted.signal);
     } catch (error) {
       if (error instanceof CriticalValueError) {
-        throw new UnprocessableEntityException(CRITICAL_VALUE_MESSAGE);
+        throw new UnprocessableEntityException(messages.criticalValue);
       }
       throw error;
     }
@@ -104,12 +104,12 @@ export class LabReportController {
       for await (const text of pieces) {
         response.write(`data: ${JSON.stringify({ text })}\n\n`);
       }
-      const done = { model: this.explainLabReport.modelVersion, disclaimer: DISCLAIMER };
+      const done = { model: this.explainLabReport.modelVersion, disclaimer: messages.disclaimer };
       response.write(`event: done\ndata: ${JSON.stringify(done)}\n\n`);
-    } catch (error) {
+    } catch {
       if (!aborted.signal.aborted) {
-        const message = error instanceof Error ? error.message : 'generation failed';
-        response.write(`event: error\ndata: ${JSON.stringify({ message })}\n\n`);
+        const failure = { message: messages.generationFailed };
+        response.write(`event: error\ndata: ${JSON.stringify(failure)}\n\n`);
       }
     } finally {
       response.end();
