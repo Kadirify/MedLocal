@@ -1,23 +1,30 @@
+import type { Messages } from "../messages";
 import type { Flag, LabResult } from "../types";
 
-const FLAG_LABEL: Record<Flag, string> = { LOW: "Düşük", NORMAL: "Normal", HIGH: "Yüksek" };
 const FLAG_STYLE: Record<Flag, string> = {
   LOW: "bg-low/10 text-low",
   NORMAL: "bg-canvas text-muted",
   HIGH: "bg-high/10 text-high",
 };
 
-export function ResultsTable({ results }: { results: LabResult[] }) {
+interface Props {
+  results: LabResult[];
+  messages: Messages;
+}
+
+export function ResultsTable({ results, messages }: Props) {
+  const { columns } = messages;
+
   return (
     <div className="overflow-x-auto">
       <table className="w-full text-left text-sm">
         <thead className="border-b border-line text-xs uppercase tracking-wide text-muted">
           <tr>
-            <th className="py-2 pr-4 font-medium">Tahlil</th>
-            <th className="py-2 pr-4 text-right font-medium">Sonuç</th>
-            <th className="py-2 pr-4 font-medium">Birim</th>
-            <th className="py-2 pr-4 font-medium">Referans</th>
-            <th className="py-2 font-medium">Durum</th>
+            <th className="py-2 pr-4 font-medium">{columns.test}</th>
+            <th className="py-2 pr-4 text-right font-medium">{columns.result}</th>
+            <th className="py-2 pr-4 font-medium">{columns.unit}</th>
+            <th className="py-2 pr-4 font-medium">{columns.reference}</th>
+            <th className="py-2 font-medium">{columns.status}</th>
           </tr>
         </thead>
         <tbody>
@@ -33,7 +40,7 @@ export function ResultsTable({ results }: { results: LabResult[] }) {
                 {result.referenceSource === "catalog" && <sup className="ml-0.5 text-high">*</sup>}
               </td>
               <td className="py-2">
-                <Badge result={result} />
+                <Badge result={result} messages={messages} />
               </td>
             </tr>
           ))}
@@ -41,18 +48,16 @@ export function ResultsTable({ results }: { results: LabResult[] }) {
       </table>
       {results.some((result) => result.referenceSource === "catalog") && (
         <p className="mt-3 text-xs text-muted">
-          <span className="text-high">*</span> Raporunuzda bu tahlil için aralık basılmamış. Genel
-          yetişkin aralığı kullanıldı; laboratuvarınızın aralığı yaşa veya yönteme göre farklı
-          olabilir.
+          <span className="text-high">*</span> {messages.catalogRange}
         </p>
       )}
     </div>
   );
 }
 
-function Badge({ result }: { result: LabResult }) {
+function Badge({ result, messages }: { result: LabResult; messages: Messages }) {
   const style = result.critical ? "bg-critical text-white" : FLAG_STYLE[result.flag];
-  const label = result.critical ? "Kritik" : FLAG_LABEL[result.flag];
+  const label = result.critical ? messages.critical : messages.flags[result.flag];
   return <span className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${style}`}>{label}</span>;
 }
 

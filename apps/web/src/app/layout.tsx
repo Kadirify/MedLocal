@@ -3,7 +3,7 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: "MedLocal",
-  description: "Tahlil sonuçlarınızı kendi bilgisayarınızda, sade bir dille açıklar.",
+  description: "Explains lab results in plain language, on your own computer. Tahlil sonuçlarınızı kendi bilgisayarınızda açıklar.",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

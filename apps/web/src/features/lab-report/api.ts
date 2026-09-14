@@ -1,17 +1,30 @@
+import type { Language } from "./messages";
 import type { ExplanationFooter, LabReport, Sex } from "./types";
 
 // same origin: next.config.ts proxies /api to the API server
 const API_URL = "/api";
-const LANGUAGE = "tr";
 
-export class ApiError extends Error {}
+/** `serverMessage` is already in the reader's language; without one the caller words the failure. */
+export class ApiError extends Error {
+  constructor(
+    readonly serverMessage: string | null,
+    readonly status: number | null,
+  ) {
+    super(serverMessage ?? `request failed (${status ?? "unreachable"})`);
+  }
+}
 
-export async function uploadLabReport(file: File, sex: Sex, age: number): Promise<LabReport> {
+export async function uploadLabReport(
+  file: File,
+  sex: Sex,
+  age: number,
+  language: Language,
+): Promise<LabReport> {
   const form = new FormData();
   form.set("file", file);
   form.set("sex", sex);
   form.set("age", String(age));
-  form.set("language", LANGUAGE);
+  form.set("language", language);
 
   const response = await request("/lab-reports", { method: "POST", body: form });
   return (await response.json()) as LabReport;
@@ -24,6 +37,7 @@ interface ExplanationHandlers {
 
 export async function streamExplanation(
   report: LabReport,
+  language: Language,
   handlers: ExplanationHandlers,
   signal: AbortSignal,
 ): Promise<void> {
@@ -34,11 +48,11 @@ export async function streamExplanation(
     body: JSON.stringify({
       sex: report.sex,
       age: report.age,
-      language: LANGUAGE,
+      language,
       results: report.results.map(({ analyte, value, low, high }) => ({ analyte, value, low, high })),
     }),
   });
-  if (!response.body) throw new ApiError("the server sent an empty reply");
+  if (!response.body) throw new ApiError(null, response.status);
 
   const decoder = new TextDecoder();
   let pending = "";
@@ -56,18 +70,18 @@ function dispatch(event: string, handlers: ExplanationHandlers): void {
   if (!data) return;
 
   const payload = JSON.parse(data) as { text?: string; message?: string } & ExplanationFooter;
-  if (name === "error") throw new ApiError(payload.message ?? "generation failed");
+  if (name === "error") throw new ApiError(payload.message ?? null, null);
   if (name === "done") handlers.onDone(payload);
   else if (payload.text) handlers.onText(payload.text);
 }
 
 async function request(path: string, init: RequestInit): Promise<Response> {
   const response = await fetch(`${API_URL}${path}`, init).catch(() => {
-    throw new ApiError("API'ye ulaşılamıyor. Sunucunun çalıştığından emin olun.");
+    throw new ApiError(null, null);
   });
   if (response.ok) return response;
 
   const body = (await response.json().catch(() => null)) as { message?: string | string[] } | null;
   const message = Array.isArray(body?.message) ? body.message.join(", ") : body?.message;
-  throw new ApiError(message ?? `İstek başarısız oldu (${response.status}).`);
+  throw new ApiError(message ?? null, response.status);
 }
