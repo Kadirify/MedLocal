@@ -3,19 +3,45 @@
 /* System fonts only: a web font would be fetched from a third party at build time. */
 @theme inline {
   --font-sans: ui-sans-serif, system-ui, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-  --color-ink: #16202a;
-  --color-muted: #5b6875;
-  --color-line: #dfe5ea;
+  --color-ink: #12202b;
+  --color-muted: #5a6b7a;
+  --color-line: #dde5eb;
   --color-surface: #ffffff;
-  --color-canvas: #f4f7f9;
-  --color-accent: #0f6e6e;
-  --color-low: #1d5fa8;
-  --color-high: #b4531a;
-  --color-critical: #a8201a;
+  --color-canvas: #f3f6f9;
+  --color-accent: #0b6b6b;
+  --color-accent-soft: #e3f2f1;
+  --color-low: #1c5fae;
+  --color-low-soft: #e6effa;
+  --color-high: #b3521a;
+  --color-high-soft: #fbece2;
+  --color-ok: #2f7d4f;
+  --color-ok-soft: #e5f3ea;
+  --color-critical: #a5201b;
+  --shadow-card: 0 1px 2px rgb(18 32 43 / 0.04), 0 8px 24px -12px rgb(18 32 43 / 0.12);
 }
 
 body {
-  background: var(--color-canvas);
+  background:
+    radial-gradient(1200px 400px at 50% -200px, var(--color-accent-soft), transparent),
+    var(--color-canvas);
+  background-repeat: no-repeat;
   color: var(--color-ink);
   font-family: var(--font-sans);
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+}
+
+.rise {
+  animation: rise 0.35s ease-out both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rise {
+    animation: none;
+  }
 }
