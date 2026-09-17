@@ -3,7 +3,7 @@
 import { useState, type DragEvent, type FormEvent } from "react";
 import type { Messages } from "../messages";
 import type { Sex } from "../types";
-import { DocumentIcon } from "./icons";
+import { DocumentIcon } from "@/components/icons";
 
 interface Props {
   busy: boolean;

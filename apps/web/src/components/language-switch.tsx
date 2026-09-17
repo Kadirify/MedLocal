@@ -1,6 +1,6 @@
 "use client";
 
-import { LANGUAGES, type Language } from "../messages";
+import { LANGUAGES, type Language } from "@/i18n/language";
 
 interface Props {
   language: Language;

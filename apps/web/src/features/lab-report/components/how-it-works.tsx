@@ -1,6 +1,6 @@
 import type { ComponentType } from "react";
 import type { Messages } from "../messages";
-import { ChatIcon, DocumentIcon, RulerIcon } from "./icons";
+import { ChatIcon, DocumentIcon, RulerIcon } from "@/components/icons";
 
 const ICONS: ComponentType<{ className?: string }>[] = [DocumentIcon, RulerIcon, ChatIcon];
 

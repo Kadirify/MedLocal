@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useSyncExternalStore } from "react";
-import { LANGUAGES, type Language } from "./messages";
+import { LANGUAGES, type Language } from "./language";
 
 const STORAGE_KEY = "medlocal.language";
 const FALLBACK: Language = "tr";

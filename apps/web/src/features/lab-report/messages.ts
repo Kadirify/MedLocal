@@ -1,8 +1,5 @@
+import type { Language } from "@/i18n/language";
 import type { Flag } from "./types";
-
-export type Language = "tr" | "en";
-
-export const LANGUAGES: readonly Language[] = ["tr", "en"];
 
 interface Step {
   title: string;
@@ -12,7 +9,6 @@ interface Step {
 export interface Messages {
   headline: string;
   tagline: string;
-  localBadge: string;
   dropHere: string;
   fileHint: string;
   changeFile: string;
@@ -36,8 +32,6 @@ export interface Messages {
   critical: string;
   unreachable: string;
   requestFailed: (status: number) => string;
-  notADevice: string;
-  sourceCode: string;
 }
 
 export const MESSAGES: Record<Language, Messages> = {
@@ -46,7 +40,6 @@ export const MESSAGES: Record<Language, Messages> = {
     tagline:
       "PDF raporunuzu yükleyin; hangi değerlerin aralık dışında olduğunu görün ve sade bir dille " +
       "açıklamasını okuyun. Dosyanız bu bilgisayardan dışarı çıkmaz.",
-    localBadge: "Tamamen yerel çalışır",
     dropHere: "PDF raporunuzu buraya sürükleyin veya seçmek için tıklayın",
     fileHint: "Seçilebilir metin içeren PDF, en fazla 10 MB",
     changeFile: "Değiştirmek için tıklayın",
@@ -85,15 +78,12 @@ export const MESSAGES: Record<Language, Messages> = {
     critical: "Kritik",
     unreachable: "API'ye ulaşılamıyor. Sunucunun çalıştığından emin olun.",
     requestFailed: (status) => `İstek başarısız oldu (${status}).`,
-    notADevice: "MedLocal bir araştırma projesidir; tıbbi cihaz değildir, tanı veya tedavi önerisi vermez.",
-    sourceCode: "Kaynak kodu",
   },
   en: {
     headline: "Understand your lab results",
     tagline:
       "Upload your PDF report, see which values fall outside their range, and read a " +
       "plain-language explanation. Your file never leaves this computer.",
-    localBadge: "Runs entirely on this machine",
     dropHere: "Drop your PDF report here, or click to choose one",
     fileHint: "PDF with selectable text, up to 10 MB",
     changeFile: "Click to change",
@@ -132,8 +122,5 @@ export const MESSAGES: Record<Language, Messages> = {
     critical: "Critical",
     unreachable: "The API cannot be reached. Make sure the server is running.",
     requestFailed: (status) => `The request failed (${status}).`,
-    notADevice:
-      "MedLocal is a research project. It is not a medical device and gives no diagnosis or treatment advice.",
-    sourceCode: "Source code",
   },
 };

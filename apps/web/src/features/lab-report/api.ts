@@ -1,4 +1,4 @@
-import type { Language } from "./messages";
+import type { Language } from "@/i18n/language";
 import type { ExplanationFooter, LabReport, Sex } from "./types";
 
 // same origin: next.config.ts proxies /api to the API server

@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { ApiError, streamExplanation, uploadLabReport } from "./api";
-import type { Language } from "./messages";
+import type { Language } from "@/i18n/language";
 import type { ExplanationFooter, LabReport, Sex } from "./types";
 
 type Status = "idle" | "reading" | "explaining" | "done" | "failed";
