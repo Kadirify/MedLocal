@@ -1,10 +1,10 @@
 # MedLocal
 
-A lab report explainer that runs entirely on your own machine.
+A clinical support tool that helps physicians review lab reports faster — entirely on their own machine.
 
-Upload a lab PDF. Deterministic code reads the values and flags what is out of range; a small fine-tuned language model then explains the flagged results in plain language. Nothing is sent to a cloud service, so the report never leaves the device.
+Upload a lab PDF. Deterministic code reads the values and flags what is out of range; a small fine-tuned language model then drafts a plain-language summary for patient communication. Nothing is sent to a cloud service, so patient data never leaves the device.
 
-> MedLocal is a research and learning project. It is not a medical device and does not provide diagnosis or treatment advice.
+> MedLocal is a research project. It is not a medical device and does not provide diagnosis or treatment advice. The clinical decision is always the physician's.
 
 ## How it works
 
@@ -15,29 +15,29 @@ flowchart LR
     F -->|critical value| S[Fixed safety message]
     F -->|otherwise| B[Add catalog background for flagged results]
     B --> M[Fine-tuned 4B model via Ollama]
-    M --> E[Plain-language explanation]
+    M --> E[Plain-language summary]
 ```
 
 Three rules shape the design:
 
 - **The model never judges a number.** Whether a value is low, normal or high is decided by code, using the range printed on the report or, failing that, the catalog in [`reference/analytes.yaml`](reference/analytes.yaml). The model only puts the result into words.
-- **Critical values bypass the model.** A potassium of 6.9 gets a fixed "contact your doctor now" message and no generated text.
-- **Unknown rows are shown, not guessed.** Labels the catalog does not know are listed as unrecognised and left out of the explanation.
+- **Critical values bypass the model.** A potassium of 6.9 gets a fixed alert message and no generated text.
+- **Unknown rows are shown, not guessed.** Labels the catalog does not know are listed as unrecognised and left out of the summary.
 
 ## Training the explainer
 
 There is no public dataset of lab reports paired with patient-friendly explanations, so the training data is built locally:
 
 1. A generator draws realistic synthetic reports from the analyte catalog (58 analytes, in English and Turkish). Values an analyser calculates from others are calculated here too, so a report never contradicts itself. No real patient data is used anywhere.
-2. A larger local teacher model (Qwen3-14B, Apache 2.0) writes an explanation for each report, grounded in vetted background text from the catalog.
-3. Every explanation must pass eleven rule-based checks. Failures are regenerated, and reports the teacher cannot get right are left out.
+2. A larger local teacher model (Qwen3-14B, Apache 2.0) writes a summary for each report, grounded in vetted background text from the catalog.
+3. Every summary must pass eleven rule-based checks. Failures are regenerated, and reports the teacher cannot get right are left out.
 4. Qwen3-4B is fine-tuned on the result with QLoRA on a single 12 GB consumer GPU, then merged, converted to GGUF and served by Ollama.
 
 The model is given the catalog's vetted background for every flagged result, at training time and in the app. It restates that text in plain language; it is not asked to recall medicine from memory.
 
 ## Results so far
 
-**Lab explainer**, 262 held-out synthetic reports, half of them Turkish. An explanation passes when it satisfies all eleven safety rules: every flagged result mentioned with the right direction, no diagnosis, no medication advice, no verdict on the patient's overall health, no condition the catalog does not name, no false alarm about a normal result, a referral to a doctor, plain text, sensible length.
+**Lab explainer**, 262 held-out synthetic reports, half of them Turkish. A summary passes when it satisfies all eleven safety rules: every flagged result mentioned with the right direction, no diagnosis, no medication advice, no verdict on the patient's overall health, no condition the catalog does not name, no false alarm about a normal result, a referral to a doctor, plain text, sensible length.
 
 | Model | English | Turkish |
 |---|---|---|
@@ -61,7 +61,7 @@ Macro F1 moves much less than accuracy because the fine-tuned model still fails 
 ```
 training/    Python. Synthetic data, QLoRA fine-tuning, evaluation, GGUF export.
 apps/api/    NestJS. PDF parsing, reference-range rules, Ollama access.
-apps/web/    Next.js. Upload, result table, streamed explanation.
+apps/web/    Next.js. Upload, result table, streamed summary.
 reference/   Analyte catalog and the prompt contract shared by training and the API.
 models/      Ollama Modelfiles. Weights are not committed.
 docs/        Roadmap, architecture, decisions, measured results.
@@ -89,7 +89,7 @@ Training commands are listed in [`CONTRIBUTING.md`](CONTRIBUTING.md) and driven 
 ## Limits
 
 - The PDF reader handles reports with a text layer and one result per row. Scanned reports need OCR and are rejected.
-- Explanations are available in Turkish and English; the interface is Turkish. The Turkish text has occasional awkward phrasing inherited from the teacher model.
+- Summaries are available in Turkish and English. The Turkish text has occasional awkward phrasing inherited from the teacher model.
 - Reference ranges in the catalog are typical adult values. They differ between laboratories, which is why a range printed on the report always takes precedence.
 - The rule-based checks catch unsafe patterns, not every medical inaccuracy. Nothing here has been clinically validated.
 

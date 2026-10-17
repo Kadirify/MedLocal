@@ -32,29 +32,31 @@ export interface AboutContent {
 export const ABOUT: Record<Language, AboutContent> = {
   tr: {
     eyebrow: "Hakkında",
-    headline: "Tahlil kâğıdını anlaşılır kılmak, veriyi evden çıkarmadan",
+    headline: "Tahlil raporlarını hızla değerlendirin, hasta verisini dışarı çıkarmadan",
     lead:
-      "MedLocal, laboratuvar raporunuzdaki değerleri okuyan, hangilerinin aralık dışında olduğunu " +
-      "gösteren ve bunları sade bir Türkçeyle açıklayan açık kaynaklı bir projedir. Her şey kendi " +
-      "bilgisayarınızda çalışır.",
+      "MedLocal, laboratuvar raporundaki değerleri okuyan, aralık dışı sonuçları işaretleyen ve " +
+      "hasta bilgilendirmesi için hazır bir özet üreten açık kaynaklı bir klinik destek aracıdır. " +
+      "Her şey kendi bilgisayarınızda çalışır.",
     purpose: {
       title: "Neden var?",
       paragraphs: [
-        "Tahlil sonucunu alan çoğu kişi bir sayı listesiyle baş başa kalır: “Ferritin 8, MCV 74, LDL 131.” " +
-          "Doktor randevusu günler sonradır; arada internette yapılan aramalar çoğu zaman gereksiz kaygı üretir.",
-        "MedLocal bu boşluğu doldurmayı amaçlar: tanı koymadan, ilaç önermeden, yalnızca “bu test neyi ölçer, " +
-          "bu yöndeki bir sonuç genel olarak nelerle ilişkili olabilir” sorusunu yanıtlar. Amaç doktorun yerini " +
-          "almak değil, doktora daha hazırlıklı gitmenizi sağlamaktır.",
-        "Sağlık verisi en hassas kişisel veridir. Bu yüzden proje baştan “bulutsuz” tasarlandı: raporunuz " +
-          "hiçbir sunucuya gönderilmez.",
+        "Yoğun poliklinik saatlerinde bir doktor onlarca tahlil raporunu değerlendirmek zorundadır. " +
+          "Her raporun tek tek incelenmesi, aralık dışı değerlerin bulunması ve hastaya anlaşılır " +
+          "şekilde aktarılması zaman alır.",
+        "MedLocal bu süreci hızlandırır: rapordan değerleri otomatik okur, aralık dışı olanları " +
+          "kod ile belirler ve hastaya aktarılabilecek sade bir özet oluşturur. Doktorun klinik " +
+          "kararını almaz; ön değerlendirme ve hasta iletişimi için zaman kazandırır.",
+        "Sağlık verisi en hassas kişisel veridir. Bu yüzden proje baştan "bulutsuz" tasarlandı: " +
+          "hasta raporu hiçbir sunucuya gönderilmez.",
       ],
     },
     audience: {
       title: "Kimler için?",
       items: [
-        "Tahlil sonucunu doktor görüşmesinden önce anlamak isteyen herkes",
-        "Hasta verisini dışarı çıkaramayan klinikler ve araştırmacılar için bir başlangıç noktası",
-        "Yerel dil modeli eğitmeyi ve ürünleştirmeyi uçtan uca görmek isteyen geliştiriciler",
+        "Yoğun poliklinikte tahlil sonuçlarını hızla değerlendirmek isteyen hekimler",
+        "Hasta verisini dışarı çıkaramayan klinikler ve sağlık kuruluşları",
+        "Hasta bilgilendirme sürecini kolaylaştırmak isteyen aile hekimleri",
+        "Yerel dil modeli eğitmeyi ve sağlık alanında uygulamayı görmek isteyen geliştiriciler",
       ],
     },
     principles: {
@@ -66,7 +68,7 @@ export const ABOUT: Record<Language, AboutContent> = {
         },
         {
           title: "Kritik değerler modele gitmez",
-          text: "Beklenen aralığın çok dışındaki bir değer için sabit bir “hemen doktorunuza başvurun” mesajı gösterilir; yapay zekâ hiç çalıştırılmaz.",
+          text: "Beklenen aralığın çok dışındaki bir değer için sabit bir uyarı mesajı gösterilir; yapay zekâ hiç çalıştırılmaz.",
         },
         {
           title: "Bilgi ezberden değil, kaynaktan gelir",
@@ -75,18 +77,18 @@ export const ABOUT: Record<Language, AboutContent> = {
       ],
     },
     privacy: {
-      title: "Gizlilik",
+      title: "Gizlilik ve veri güvenliği",
       paragraphs: [
-        "PDF dosyanız bu bilgisayardaki API tarafından bellekte işlenir, diske yazılmaz ve kayıtlara geçmez. " +
-          "Dil modeli de aynı bilgisayarda, Ollama üzerinde çalışır.",
-        "Sayfa hiçbir dış kaynaktan font, ikon ya da analiz betiği yüklemez. İnternet bağlantınızı kapatıp " +
-          "deneyebilirsiniz; uygulama çalışmaya devam eder.",
+        "PDF dosyası bu bilgisayardaki API tarafından bellekte işlenir, diske yazılmaz ve kayıtlara geçmez. " +
+          "Dil modeli de aynı bilgisayarda, Ollama üzerinde çalışır. Hasta verisi hiçbir dış sunucuya iletilmez.",
+        "Sayfa hiçbir dış kaynaktan font, ikon ya da analiz betiği yüklemez. İnternet bağlantısı olmadan da " +
+          "çalışır; bu sayede kapalı ağlardaki kliniklerde bile kullanılabilir.",
       ],
     },
     model: {
       title: "Model nasıl eğitildi?",
       lead:
-        "Tahlil raporu ile hasta diliyle açıklama içeren hazır bir veri seti yoktur. Bu yüzden veri yerelde üretildi: " +
+        "Tahlil raporu ile sade dilde açıklama içeren hazır bir veri seti yoktur. Bu yüzden veri yerelde üretildi: " +
         "58 tahlillik iki dilli bir katalogdan sentetik raporlar çıkarıldı, daha büyük bir yerel model açıklamaları yazdı, " +
         "on bir güvenlik kuralından geçemeyenler elendi. Küçük model bu veriyle tek bir tüketici ekran kartında eğitildi.",
       facts: [
@@ -102,8 +104,8 @@ export const ABOUT: Record<Language, AboutContent> = {
     limits: {
       title: "Ne yapmaz?",
       items: [
-        "Tanı koymaz, tedavi ya da ilaç önermez, genel sağlık durumunuz hakkında hüküm vermez.",
-        "Tıbbi cihaz değildir; hiçbir çıktısı bir hekim tarafından gözden geçirilmemiştir.",
+        "Tanı koymaz, tedavi ya da ilaç önermez — klinik karar her zaman hekimindir.",
+        "Tıbbi cihaz değildir; hiçbir çıktısı klinik validasyondan geçmemiştir.",
         "Taranmış ya da fotoğrafı çekilmiş raporları okuyamaz; PDF seçilebilir metin içermelidir.",
         "Katalogdaki referans aralıkları genel yetişkin değerleridir; laboratuvarınızın aralığı her zaman önceliklidir.",
         "Türkçe açıklamalarda zaman zaman tutuk ifadeler görülebilir.",
@@ -113,23 +115,23 @@ export const ABOUT: Record<Language, AboutContent> = {
       title: "Sık sorulanlar",
       items: [
         {
-          question: "Raporum bir yere gönderiliyor mu?",
-          answer: "Hayır. Dosya yalnızca bu bilgisayardaki API'ye gider; oradan da aynı bilgisayardaki modele.",
+          question: "Hasta raporu bir yere gönderiliyor mu?",
+          answer: "Hayır. Dosya yalnızca bu bilgisayardaki API'ye gider; oradan da aynı bilgisayardaki modele. Hiçbir veri dışarı çıkmaz.",
         },
         {
-          question: "Açıklamaya güvenebilir miyim?",
+          question: "Üretilen açıklamayı doğrudan hastaya verebilir miyim?",
           answer:
-            "Açıklama, doktorunuzla konuşmanıza hazırlık içindir. Bir değerin sizin için ne anlama geldiğine yalnızca " +
-            "sizi tanıyan bir hekim karar verebilir.",
+            "Açıklama bir ön taslak niteliğindedir. Son kararı veren hekimdir; " +
+            "açıklamayı kendi klinik değerlendirmenizle birlikte kullanmanız önerilir.",
         },
         {
-          question: "Bazı satırlar neden “tanınmayan” olarak listeleniyor?",
+          question: "Bazı satırlar neden "tanınmayan" olarak listeleniyor?",
           answer:
             "Katalogda olmayan bir tahlili tahmin etmek yerine açıkça belirtmeyi tercih ediyoruz. Katalog zamanla genişletilebilir.",
         },
         {
-          question: "Kendi bilgisayarıma kurabilir miyim?",
-          answer: "Evet. Kaynak kodu açıktır; kurulum adımları depodaki README dosyasındadır.",
+          question: "Kliniğimize kurabilir miyiz?",
+          answer: "Evet. Kaynak kodu açıktır; kurulum adımları depodaki README dosyasındadır. İnternet bağlantısı gerektirmez.",
         },
       ],
     },
@@ -137,28 +139,30 @@ export const ABOUT: Record<Language, AboutContent> = {
   },
   en: {
     eyebrow: "About",
-    headline: "Making a lab report readable, without the data leaving home",
+    headline: "Review lab reports faster, without patient data leaving the building",
     lead:
-      "MedLocal is an open-source project that reads the values on your laboratory report, shows which " +
-      "fall outside their range, and explains them in plain language. Everything runs on your own computer.",
+      "MedLocal is an open-source clinical support tool that reads a laboratory report, flags " +
+      "out-of-range values, and produces a plain-language summary ready for patient communication. " +
+      "Everything runs on your own machine.",
     purpose: {
       title: "Why it exists",
       paragraphs: [
-        "Most people who receive lab results are left alone with a list of numbers: “Ferritin 8, MCV 74, LDL 131.” " +
-          "The doctor's appointment is days away, and searching the internet in between mostly produces needless worry.",
-        "MedLocal aims to fill that gap. Without diagnosing and without recommending medicine, it answers one question: " +
-          "what does this test measure, and what can a result in this direction be associated with in general? " +
-          "The goal is not to replace the doctor but to help you arrive better prepared.",
-        "Health data is the most sensitive personal data there is. That is why the project was designed without a cloud " +
-          "from the start: your report is never sent to a server.",
+        "In a busy outpatient clinic a physician reviews dozens of lab reports each day. " +
+          "Scanning each one for out-of-range values and explaining them to patients in plain language takes time.",
+        "MedLocal speeds up that workflow: it reads values from the PDF automatically, flags abnormal " +
+          "results with deterministic code, and drafts a patient-friendly summary. It does not make " +
+          "clinical decisions; it saves time on preliminary review and patient communication.",
+        "Health data is the most sensitive personal data there is. That is why the project was designed " +
+          "without a cloud from the start: patient reports are never sent to a server.",
       ],
     },
     audience: {
       title: "Who it is for",
       items: [
-        "Anyone who wants to understand their results before seeing a doctor",
-        "A starting point for clinics and researchers who cannot let patient data leave the building",
-        "Developers who want to see a local language model trained and shipped end to end",
+        "Physicians who need to review lab results quickly during busy clinic hours",
+        "Clinics and healthcare facilities that cannot let patient data leave the network",
+        "Primary care doctors looking to streamline patient communication",
+        "Developers who want to see a local language model trained and deployed in healthcare",
       ],
     },
     principles: {
@@ -170,7 +174,7 @@ export const ABOUT: Record<Language, AboutContent> = {
         },
         {
           title: "Critical values bypass the model",
-          text: "A value far outside the expected range gets a fixed “contact your doctor now” message. The AI is not run at all.",
+          text: "A value far outside the expected range gets a fixed alert message. The AI is not run at all.",
         },
         {
           title: "Knowledge comes from a source, not from memory",
@@ -179,18 +183,18 @@ export const ABOUT: Record<Language, AboutContent> = {
       ],
     },
     privacy: {
-      title: "Privacy",
+      title: "Privacy and data security",
       paragraphs: [
-        "Your PDF is processed in memory by the API on this computer. It is not written to disk and not logged. " +
-          "The language model runs on the same machine, through Ollama.",
-        "The page loads no fonts, icons or analytics scripts from anywhere else. You can switch off your internet " +
-          "connection and the app keeps working.",
+        "The PDF is processed in memory by the API on this computer. It is not written to disk and not logged. " +
+          "The language model runs on the same machine, through Ollama. No patient data is transmitted externally.",
+        "The page loads no fonts, icons or analytics scripts from anywhere else. It works without an internet " +
+          "connection, making it suitable for air-gapped clinic networks.",
       ],
     },
     model: {
       title: "How the model was trained",
       lead:
-        "There is no public dataset of lab reports paired with patient-friendly explanations, so the data was built locally: " +
+        "There is no public dataset of lab reports paired with plain-language explanations, so the data was built locally: " +
         "synthetic reports were drawn from a bilingual catalog of 58 tests, a larger local model wrote the explanations, and " +
         "those failing any of eleven safety rules were discarded. The small model was then trained on a single consumer GPU.",
       facts: [
@@ -206,8 +210,8 @@ export const ABOUT: Record<Language, AboutContent> = {
     limits: {
       title: "What it does not do",
       items: [
-        "It does not diagnose, recommend treatment or medicine, or pass a verdict on your overall health.",
-        "It is not a medical device, and none of its output has been reviewed by a clinician.",
+        "It does not diagnose, recommend treatment or medicine — the clinical decision is always yours.",
+        "It is not a medical device, and none of its output has been clinically validated.",
         "It cannot read scanned or photographed reports; the PDF has to contain selectable text.",
         "The catalog's reference ranges are general adult values; your laboratory's range always takes precedence.",
         "Turkish explanations occasionally contain stiff phrasing.",
@@ -217,13 +221,14 @@ export const ABOUT: Record<Language, AboutContent> = {
       title: "Common questions",
       items: [
         {
-          question: "Is my report sent anywhere?",
-          answer: "No. The file goes only to the API on this computer, and from there to the model on the same machine.",
+          question: "Is patient data sent anywhere?",
+          answer: "No. The file goes only to the API on this computer, and from there to the model on the same machine. Nothing leaves the network.",
         },
         {
-          question: "Can I rely on the explanation?",
+          question: "Can I give the summary directly to a patient?",
           answer:
-            "It is meant to prepare you for a conversation with your doctor. Only a clinician who knows you can decide what a value means for you.",
+            "The summary is a draft. The final call is the physician's; it is meant to be used " +
+            "alongside your own clinical assessment.",
         },
         {
           question: "Why are some rows listed as not recognised?",
@@ -231,8 +236,8 @@ export const ABOUT: Record<Language, AboutContent> = {
             "We prefer to say openly that a test is not in the catalog rather than guess at it. The catalog can grow over time.",
         },
         {
-          question: "Can I run it on my own computer?",
-          answer: "Yes. The source code is open, and the setup steps are in the repository's README.",
+          question: "Can we deploy it in our clinic?",
+          answer: "Yes. The source code is open, and the setup steps are in the repository's README. No internet connection is required.",
         },
       ],
     },

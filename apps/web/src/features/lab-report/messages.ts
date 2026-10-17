@@ -36,10 +36,10 @@ export interface Messages {
 
 export const MESSAGES: Record<Language, Messages> = {
   tr: {
-    headline: "Tahlil sonuçlarınızı anlayın",
+    headline: "Tahlil raporlarını hızla değerlendirin",
     tagline:
-      "PDF raporunuzu yükleyin; hangi değerlerin aralık dışında olduğunu görün ve sade bir dille " +
-      "açıklamasını okuyun. Dosyanız bu bilgisayardan dışarı çıkmaz.",
+      "PDF raporunu yükleyin; aralık dışı değerleri anında görün ve hasta bilgilendirmesi için " +
+      "hazır bir açıklama alın. Hasta verisi bu bilgisayardan dışarı çıkmaz.",
     dropHere: "PDF raporunuzu buraya sürükleyin veya seçmek için tıklayın",
     fileHint: "Seçilebilir metin içeren PDF, en fazla 10 MB",
     changeFile: "Değiştirmek için tıklayın",
@@ -60,8 +60,8 @@ export const MESSAGES: Record<Language, Messages> = {
         text: "Bir değerin düşük mü yüksek mi olduğuna yapay zekâ değil, kod karar verir. Kritik değerlerde model hiç çalışmaz.",
       },
       {
-        title: "Model anlatır",
-        text: "Bu bilgisayarda çalışan küçük bir dil modeli, doğrulanmış notlara dayanarak sonuçları sade dille açıklar.",
+        title: "Model özetler",
+        text: "Bu bilgisayarda çalışan küçük bir dil modeli, doğrulanmış notlara dayanarak sonuçları hastaya aktarılabilecek sade bir dille özetler.",
       },
     ],
     results: "Sonuçlar",
@@ -80,10 +80,10 @@ export const MESSAGES: Record<Language, Messages> = {
     requestFailed: (status) => `İstek başarısız oldu (${status}).`,
   },
   en: {
-    headline: "Understand your lab results",
+    headline: "Review lab reports faster",
     tagline:
-      "Upload your PDF report, see which values fall outside their range, and read a " +
-      "plain-language explanation. Your file never leaves this computer.",
+      "Upload a PDF report, instantly see out-of-range values, and get a ready-made " +
+      "plain-language summary for patient communication. Patient data never leaves this machine.",
     dropHere: "Drop your PDF report here, or click to choose one",
     fileHint: "PDF with selectable text, up to 10 MB",
     changeFile: "Click to change",
@@ -104,8 +104,8 @@ export const MESSAGES: Record<Language, Messages> = {
         text: "Whether a value is low or high is decided by code, not by AI. For critical values the model never runs.",
       },
       {
-        title: "The model explains",
-        text: "A small language model running on this machine explains the results in plain words, grounded in vetted notes.",
+        title: "The model summarises",
+        text: "A small language model running on this machine summarises the results in patient-friendly language, grounded in vetted notes.",
       },
     ],
     results: "Results",
