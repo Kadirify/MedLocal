@@ -6,6 +6,22 @@ Upload a lab PDF. Deterministic code reads the values and flags what is out of r
 
 > MedLocal is a research project. It is not a medical device and does not provide diagnosis or treatment advice. The clinical decision is always the physician's.
 
+## Demo
+
+Upload a PDF, see out-of-range values flagged instantly, and read the model's plain-language summary:
+
+<p align="center">
+  <img src="docs/images/01-upload.jpg" width="700" alt="Upload a lab report PDF" />
+</p>
+
+<p align="center">
+  <img src="docs/images/02-results.jpg" width="700" alt="Results table with range bars and flags" />
+</p>
+
+<p align="center">
+  <img src="docs/images/03-explanation.jpg" width="700" alt="Model-generated plain-language summary" />
+</p>
+
 ## How it works
 
 ```mermaid
@@ -92,6 +108,15 @@ Training commands are listed in [`CONTRIBUTING.md`](CONTRIBUTING.md) and driven 
 - Summaries are available in Turkish and English. The Turkish text has occasional awkward phrasing inherited from the teacher model.
 - Reference ranges in the catalog are typical adult values. They differ between laboratories, which is why a range printed on the report always takes precedence.
 - The rule-based checks catch unsafe patterns, not every medical inaccuracy. Nothing here has been clinically validated.
+
+## Trained model
+
+The fine-tuned lab explainer is published and ready to use:
+
+| Platform | Link | Command |
+|---|---|---|
+| Ollama | [kadirify/medlocal-lab-explainer](https://ollama.com/kadirify/medlocal-lab-explainer) | `ollama pull kadirify/medlocal-lab-explainer` |
+| Hugging Face | [kadirify/medlocal-lab-4b-gguf](https://huggingface.co/kadirify/medlocal-lab-4b-gguf) | `hf download kadirify/medlocal-lab-4b-gguf` |
 
 ## Licence
 
