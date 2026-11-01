@@ -118,6 +118,44 @@ The fine-tuned lab explainer is published and ready to use:
 | Ollama | [kadirify/medlocal-lab-explainer](https://ollama.com/kadirify/medlocal-lab-explainer) | `ollama pull kadirify/medlocal-lab-explainer` |
 | Hugging Face | [kadirify/medlocal-lab-4b-gguf](https://huggingface.co/kadirify/medlocal-lab-4b-gguf) | `hf download kadirify/medlocal-lab-4b-gguf` |
 
+## Built with
+
+### Models
+
+| Model | Role | Licence |
+|---|---|---|
+| [Qwen3-4B-Instruct](https://huggingface.co/Qwen/Qwen3-4B-Instruct-2507) | Base model, fine-tuned with QLoRA | Apache 2.0 |
+| [Qwen3-14B](https://huggingface.co/Qwen/Qwen3-14B) | Teacher model for synthetic summaries | Apache 2.0 |
+
+### Training tools
+
+| Tool | Purpose |
+|---|---|
+| [Unsloth](https://github.com/unslothai/unsloth) | 4-bit loading, QLoRA, adapter merge |
+| [Hugging Face Transformers](https://github.com/huggingface/transformers) | Model and tokenizer |
+| [TRL](https://github.com/huggingface/trl) | SFTTrainer |
+| [llama.cpp](https://github.com/ggerganov/llama.cpp) | GGUF conversion |
+| [Ollama](https://ollama.com) | Local model serving |
+
+### Data sources
+
+| Dataset | Licence | Used for |
+|---|---|---|
+| [PubMedQA](https://huggingface.co/datasets/qiaojin/PubMedQA) | MIT | Pipeline benchmark (text model evaluation) |
+| Synthetic lab reports (generated locally from [`reference/analytes.yaml`](reference/analytes.yaml)) | MIT | Lab explainer training and evaluation |
+
+No real patient data is used anywhere. All training data is synthetic or from public research datasets. Details are in [`data/README.md`](data/README.md).
+
+### Application stack
+
+| Component | Technology |
+|---|---|
+| API | [NestJS](https://nestjs.com) (TypeScript) |
+| Web | [Next.js](https://nextjs.org) (React, TypeScript) |
+| PDF parsing | [pdf-parse](https://www.npmjs.com/package/pdf-parse) |
+| Package manager | [pnpm](https://pnpm.io) workspaces |
+| Python tooling | [uv](https://docs.astral.sh/uv/) |
+
 ## Licence
 
 [MIT](LICENSE) for the code, the analyte catalog and the synthetic dataset. Base and teacher models keep their own licences (Qwen3, Apache 2.0).
