@@ -46,7 +46,7 @@ export const ABOUT: Record<Language, AboutContent> = {
         "MedLocal bu süreci hızlandırır: rapordan değerleri otomatik okur, aralık dışı olanları " +
           "kod ile belirler ve hastaya aktarılabilecek sade bir özet oluşturur. Doktorun klinik " +
           "kararını almaz; ön değerlendirme ve hasta iletişimi için zaman kazandırır.",
-        "Sağlık verisi en hassas kişisel veridir. Bu yüzden proje baştan "bulutsuz" tasarlandı: " +
+        "Sağlık verisi en hassas kişisel veridir. Bu yüzden proje baştan “bulutsuz” tasarlandı: " +
           "hasta raporu hiçbir sunucuya gönderilmez.",
       ],
     },
@@ -125,7 +125,7 @@ export const ABOUT: Record<Language, AboutContent> = {
             "açıklamayı kendi klinik değerlendirmenizle birlikte kullanmanız önerilir.",
         },
         {
-          question: "Bazı satırlar neden "tanınmayan" olarak listeleniyor?",
+          question: "Bazı satırlar neden “tanınmayan” olarak listeleniyor?",
           answer:
             "Katalogda olmayan bir tahlili tahmin etmek yerine açıkça belirtmeyi tercih ediyoruz. Katalog zamanla genişletilebilir.",
         },
